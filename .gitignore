@@ -1,2 +1,2 @@
-refseq/*/*
+resources/refseq/*/*
 !refseq/readme.md
