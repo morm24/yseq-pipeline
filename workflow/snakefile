@@ -1,0 +1,27 @@
+YSEQID  = config["YSEQID"]
+BAMFILE = f"{YSEQID}_bwa-mem_hg38.bam"
+READS_1 = f"{YSEQID}/fastq/{YSEQID}_R1.fastq.gz"
+READS_2 = f"{YSEQID}/fastq/{YSEQID}_R2.fastq.gz"
+REFSEQ     = "./resources/refseq/{ref}/{ref}.fa"
+rule bwa_index:
+    input: 
+        "resources/{ref}/{ref}.fa"
+    output:
+        "resources/{ref}/{ref}.fa.amb",
+        "resources/{ref}/{ref}.fa.ann",
+        "resources/{ref}/{ref}.fa.bwt",
+        "resources/{ref}/{ref}.fa.pac",
+        "resources/{ref}/{ref}.fa.sa"
+    shell:
+        "bwa index {input}"
+
+
+
+rule bwa_mem:
+    input: 
+        READS_1, 
+        READS_2, 
+        REFSEQ
+    output: 
+        "{ID}/{BAMFILE}"
+    shell:"bwa mem {input} > {output}"
