@@ -40,6 +40,7 @@ else
 	then
     	echo "Found fastq directory for ${YSEQID} at ${FQDIR}"
     	ln -s ${FQDIR} fastq
+		#!!!  Geardy. if two dirs exisit, it takes the first one.
 	else
 		echo "/genomes/arch*/${YSEQID}/fastq directory does not exist."
 		exit 1
@@ -97,6 +98,14 @@ echo "Random password created: ${PASSWD}"
 # Generate summary file
 cat /genomes/0/script-templates/x_result_summary.txt | sed "s/<kitnumber>/${YSEQID}/g" | sed "s/<passwd>/${PASSWD}/g" >${YSEQID}_result_summary.txt
 echo "${YSEQID}_result_summary.txt created"
+
+
+#------------------------------------preprocessing done----------------------------------------------------#
+
+#------------------------------------Mapping:----------------------------------------------------#
+
+
+
 
 REF="/genomes/0/refseq/hg38/hg38.fa"
 REFURL="http://ybrowse.org/WGS/ref/hg38/hg38.fa"
@@ -165,6 +174,12 @@ CLADEFINDER="cladeFinder.py"
 # Read Group(s)
 # READ_GROUPS="\"@RG\tID:1\tSM:${YSEQID}\tPL:ILLUMINA\tPU:UNIT1\tLB:${YSEQID}\""
 
+
+
+
+
+
+
 if [[ $1 != "-resume" ]]
 then
 
@@ -228,7 +243,6 @@ echo "samtools tview ${BAMFILE_SORTED} ${REF}" >> tview_${YSEQID}.sh
 chmod a+x tview_${YSEQID}.sh
 
 
-
 if [[ $1 != "-resume" ]]
 then
 
@@ -285,6 +299,11 @@ then
 	bcftools query -f '%ID,' chrY_ancestral_${VCF_FILE}.gz | sed ':a;N;$!ba;s/\n//g' > ${YSEQID}_negatives.txt &
 	wait
 fi
+
+
+#------------------------------------Mapping done----------------------------------------------------#
+
+#------------------------------------processing bamfile & snps;----------------------------------------------------#
 
 
 ${PYTHON} ${CLADEFINDER} ${YFULLTREE} ${YSEQID}_positives.txt ${YSEQID}_negatives.txt ${YSEQID}_cladeFinderOutput.csv
@@ -496,6 +515,10 @@ cat ${YSEQID}_result_summary.txt
 
 cp /genomes/0/script-templates/indelAnalyzer_hg38.sh .
 bash indelAnalyzer_hg38.sh
+
+#------------------------------------processing bamfile & snps done----------------------------------------------------#
+
+#------------------------------------ finish script;----------------------------------------------------#
 
 END=$(date +%s.%N)
 
