@@ -1,0 +1,3 @@
+Wie gehe ich mit den parametern des Scripts um? 
+
+va. Anzahl Kerne, dauerhafte YSEQID usw. gibt e s"globale" variablen? 

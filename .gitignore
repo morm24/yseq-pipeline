@@ -1,2 +1,7 @@
+
+#reference
 resources/refseq/*/*
 !refseq/readme.md
+
+#snakemake
+.snkemake
