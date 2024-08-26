@@ -1,33 +1,30 @@
-ref     = config["ref"]
-YSEQID  = config["YSEQID"]
-BAMFILE = f"{YSEQID}_bwa-mem_{ref}.bam"
-READS_1 = f"{YSEQID}/fastq/{YSEQID}_R1.fastq.gz"
-READS_2 = f"{YSEQID}/fastq/{YSEQID}_R2.fastq.gz"
-REFSEQ     = "./resources/refseq/{ref}/{ref}.fa"
+REF     = "hg38"#config["REF"]
+YSEQID  = "63819"#config["YSEQID"]
 
 rule all:
     input:
-        BAMFILE
+        BAMFILE = f"{YSEQID}_bwa-mem_{REF}.bam"
+
 rule bwa_index:
     input: 
-        "resources/{ref}/{ref}.fa"
+        "resources/{REF}/{REF}.fa"
     output:
-        "resources/{ref}/{ref}.fa.amb",
-        "resources/{ref}/{ref}.fa.ann",
-        "resources/{ref}/{ref}.fa.bwt",
-        "resources/{ref}/{ref}.fa.pac",
-        "resources/{ref}/{ref}.fa.sa"
+        "resources/{REF}/{REF}.fa.amb",
+        "resources/{REF}/{REF}.fa.ann",
+        "resources/{REF}/{REF}.fa.bwt",
+        "resources/{REF}/{REF}.fa.pac",
+        "resources/{REF}/{REF}.fa.sa"
     shell:
         "bwa index {input}"
 
 
 rule bwa_mem:
     input: 
-        READS_1, 
-        READS_2, 
-        REFSEQ
+        READS_1 = f"{YSEQID}/fastq/{YSEQID}_R1.fastq.gz",
+        READS_2 = f"{YSEQID}/fastq/{YSEQID}_R2.fastq.gz",
+        REFSEQ     = "./resources/refseq/{REF}/{REF}.fa"
     output: 
-        "{YSEQID}/{BAMFILE}"
+        BAMFILE = f"{YSEQID}_bwa-mem_{REF}.bam"
     shell:"bwa mem {input} > {output}"
 
 

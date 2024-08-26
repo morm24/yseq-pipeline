@@ -18,7 +18,7 @@ SORTDIR='/usr/local/geospiza/var/tmp/'
 START=$(date +%s.%N)
 clear
 # setup parameters
-
+#Get Fastq files###########################################################
 YSEQID=${PWD##*/}
 # YSEQID="1234" # (the above command simply gets the name of the last segment of the current working directory)
 
@@ -46,7 +46,7 @@ else
 		exit 1
 	fi
 fi
-
+#check if size is sufficient###########################################################
 # Check file size in bytes
 need=$(ls -la fastq/ | awk '{sum+=$5;} END {printf "%i", sum;}')
 
@@ -66,7 +66,7 @@ else
 	echo "After mapping, approximately ${free_gb} GB left on /$(pwd -P | cut -d'/' -f2)."
 fi
 
-
+############################################################
 NUM_THREADS=$(getconf _NPROCESSORS_ONLN)
 echo "We can use ${NUM_THREADS} threads."
 
@@ -80,20 +80,11 @@ BWA='bwa mem'
 
 
 # Create a random password
-# PASSWD=`date +%s | sha256sum | base64 | head -c 8`
-
-# It seems like this method always generates passwords starting with a capital M
-# Should be changed!
-# Try something like:
-
-
-# 2-9 avoids confusion between 1 and l
-# head -c$((8+RANDOM%9)) gives it a random length in between 8..16 characters
-
+############################################################
 cp /genomes/0/script-templates/create_passwd.sh .
 ./create_passwd.sh ${YSEQID} || PASSWD="password"
 echo "Random password created: ${PASSWD}"
-
+############################################################
 
 # Generate summary file
 cat /genomes/0/script-templates/x_result_summary.txt | sed "s/<kitnumber>/${YSEQID}/g" | sed "s/<passwd>/${PASSWD}/g" >${YSEQID}_result_summary.txt
@@ -105,7 +96,7 @@ echo "${YSEQID}_result_summary.txt created"
 #------------------------------------Mapping:----------------------------------------------------#
 
 
-
+############################################################
 
 REF="/genomes/0/refseq/hg38/hg38.fa"
 REFURL="http://ybrowse.org/WGS/ref/hg38/hg38.fa"
@@ -149,8 +140,13 @@ if test -f "$READS_2"; then
     READS="$READS_1 $READS_2"
 fi
 
+############################################################
+
 # Place a file in the fastq directory to indicate that the mapping is being done
 touch fastq/$USER.$HOSTNAME.work
+
+
+#copy scripts nit relevant ###########################################################
 
 BAMFILE="${YSEQID}_bwa-mem_hg38.bam"
 
@@ -165,7 +161,7 @@ YFULLTREE="latest_YFull_YTree.json"
 
 cp /genomes/0/script-templates/cladeFinder.py .
 CLADEFINDER="cladeFinder.py"
-
+############################################################
 #ANN_VCF_FILE="${YSEQID}_hg38_dbSNP150_ann.vcf"
 #ANN_CLINVAR_VCF_FILE="${YSEQID}_hg38_clinvar_ann.vcf"
 
@@ -179,7 +175,7 @@ CLADEFINDER="cladeFinder.py"
 
 
 
-
+#map ###########################################################
 if [[ $1 != "-resume" ]]
 then
 
@@ -187,9 +183,11 @@ then
 	# Pipeline commands:
 	${BWA} ${BWA_PARAM} $REF $READS | \
 	samtools view -@ $NUM_THREADS -b -t $REF -o $BAMFILE -
+	###########################################################
 	samtools sort -@ $NUM_THREADS -T ${SORTDIR}sorted -o $BAMFILE_SORTED $BAMFILE
 	samtools index -@ $NUM_THREADS $BAMFILE_SORTED
 	samtools idxstats $BAMFILE_SORTED > ${BAMFILE_SORTED}.idxstats.tsv
+	###########################################################
 fi
 
 # Update summary file with BAM filesize:
@@ -199,7 +197,7 @@ cat ${YSEQID}_result_summary.txt | sed "s/<bamsize>/${BAM_FILESIZE}byte/g" >${YS
 rm -f ${YSEQID}_result_summary.txt
 mv ${YSEQID}_result_summary.txt.tmp ${YSEQID}_result_summary.txt
 
-
+###########################################################
 # We're reading the first 100k sequences from the first fastq file to determine the average read length
 READLENGTH=$(samtools bam2fq -@ ${NUM_THREADS} ${BAMFILE_SORTED} | head -n 400000 | awk '{if(NR%4==2) {count++; bases += length} } END{print(bases/count)}')
 echo "The average read length is ${READLENGTH}"
@@ -230,27 +228,30 @@ echo "Total sequenced bases: ${SEQUENCED_BASES}"
 # Calculating the coverage from the idxstats output
 COVERAGE_HG38=$(awk -v rl="${READLENGTH}" '{x+=$2;m+=$3}END{print m*rl/x "x"}' < ${YSEQID}_bwa-mem_hg38_sorted.bam.idxstats.tsv)
 echo "The hg38 coverage is ${COVERAGE_HG38}"
-
+###########################################################
 if [[ $1 != "-resume" ]]
 then
 	# Delete no longer needed large files
 	rm -f $BAMFILE # keep $BAMFILE_SORTED
 fi
-
+###########################################################
 # Easy tview file
 echo "#!/bin/bash" > tview_${YSEQID}.sh
 echo "samtools tview ${BAMFILE_SORTED} ${REF}" >> tview_${YSEQID}.sh
 chmod a+x tview_${YSEQID}.sh
-
+###########################################################
 
 if [[ $1 != "-resume" ]]
 then
 
 	# Separate chrY & mtDNA BAM files
 	samtools view -@ $NUM_THREADS -b -o "${YSEQID}_bwa-mem_hg38_chrY.bam" $BAMFILE_SORTED chrY &
+###########################################################
 	samtools view -@ $NUM_THREADS -b -o "${YSEQID}_bwa-mem_rCRS_chrM.bam" $BAMFILE_SORTED chrM &
 	wait
+###########################################################
 	samtools index "${YSEQID}_bwa-mem_hg38_chrY.bam" &
+###########################################################
 	samtools index "${YSEQID}_bwa-mem_rCRS_chrM.bam" &
 	wait
 
@@ -262,30 +263,33 @@ then
 	#rsync -e "ssh" --progress -v ${YSEQID}_bwa-mem_hg*_chrY.bam.bai ${T4VPS}:/genomes/${YSEQID}/
 
 	# mtDNA allele calling $ FASTA file generation
+
+	###########################################################
 	bcftools mpileup -r chrM -Ou -C 50 -f ${REF} ${BAMFILE_SORTED} | bcftools call --threads $NUM_THREADS -O z -v -m -P 0  > chrM_${VCF_FILE}.gz
 	tabix chrM_${VCF_FILE}.gz
 	samtools faidx $REF chrM | bcftools consensus chrM_${VCF_FILE}.gz -o ${YSEQID}_mtDNA.fasta
-
+###########################################################
 
 	# Annotate all known Y chromosome SNPs from Ybrowse
 	wget http://ybrowse.org/gbrowse2/gff/snps_hg38.vcf.gz
 	wget http://ybrowse.org/gbrowse2/gff/snps_hg38.vcf.gz.tbi
-
+###########################################################
+###########################################################get snips out of bam	
 	bcftools mpileup -r chrY -C 0 --threads $NUM_THREADS -O z -f $REF $BAMFILE_SORTED > chrY_raw_${VCF_FILE}.gz
 	tabix chrY_raw_${VCF_FILE}.gz
-
+##merge all snps (HARRY/ALIEN) and sample#########################################################
 	bcftools merge -m both -O z snps_hg38.vcf.gz chrY_raw_${VCF_FILE}.gz > chrY_merged_${VCF_FILE}.gz
 	tabix chrY_merged_${VCF_FILE}.gz
 	echo "merging completed"
-
+#get differences between HARRY/ALIEN and SAMPLE##########################################################
 	bcftools call -O z -m -P 0 chrY_merged_${VCF_FILE}.gz > chrY_called_${VCF_FILE}.gz
 	tabix chrY_called_${VCF_FILE}.gz
 	echo "calling completed"
-
+#remove HARRY/ALIEN from VCF##########################################################
 	bcftools view -O z -k -s ^HARRY,ALIEN chrY_called_${VCF_FILE}.gz >chrY_cleaned_${VCF_FILE}.gz
 	tabix chrY_cleaned_${VCF_FILE}.gz
 	echo "cleanup completed"
-
+#extraxt ancestral & derived SNPS to seperate files###########################################################
 	bcftools filter -O z -i '(GT=="1/1" && AA==REF) || (GT=="0/0" && AA==ALT)' chrY_cleaned_${VCF_FILE}.gz >chrY_derived_${VCF_FILE}.gz &
 	bcftools filter -O z -i '(GT=="0/0" && AA==REF) || (GT=="1/1" && AA==ALT)' chrY_cleaned_${VCF_FILE}.gz >chrY_ancestral_${VCF_FILE}.gz &
 	wait
@@ -293,7 +297,7 @@ then
 	tabix chrY_ancestral_${VCF_FILE}.gz &
 	wait
 	echo "ancestral & derived filters completed"
-
+#preprocessing for clade finder##########################################################
 	# Find the Y haplogroup
 	bcftools query -f '%ID,' chrY_derived_${VCF_FILE}.gz | sed ':a;N;$!ba;s/\n//g' > ${YSEQID}_positives.txt &
 	bcftools query -f '%ID,' chrY_ancestral_${VCF_FILE}.gz | sed ':a;N;$!ba;s/\n//g' > ${YSEQID}_negatives.txt &
@@ -335,6 +339,8 @@ IFS=$OLDIFS
 echo "YFULLHG: ${YFULLHG}"
 echo "YFULLPATH: ${YFULLPATH}"
 
+
+###########################################################
 cp /genomes/0/script-templates/create-mtDNA.py .
 
 cp /genomes/0/script-templates/getEquivalentAndDownstreamSNPs.py .
@@ -342,6 +348,8 @@ PHYLOEQ_SNPS_FILE=${YSEQID}_PHYLOEQ_SNPS.tsv
 DOWNSTR_SNPS_FILE=${YSEQID}_DOWNSTR_SNPS.tsv
 ${PYTHON} getEquivalentAndDownstreamSNPs.py ${YFULLTREE} "${YFULLHG}" chrY_cleaned_${VCF_FILE}.gz ${YSEQID}_positives.txt ${YSEQID}_negatives.txt ${PHYLOEQ_SNPS_FILE} ${DOWNSTR_SNPS_FILE} ${YSEQID}_bwa-mem_hg38_sorted.bam.idxstats.tsv
 
+
+###########################################################
 cp /genomes/0/script-templates/getMTDNADifferences.py .
 MTDNA_SNPS_FILE=${YSEQID}_MTDNA_SNPS.tsv
 HAPLOGREP_JAR=haplogrep-2.1.25.jar
@@ -354,7 +362,7 @@ MTHAPLOGROUP=$(${PYTHON} getMTDNADifferences.py -process chrM_${VCF_FILE}.gz ${H
 
 # Note: Since the YFull tree uses forward slashes for identical SNPs with different names, we replace the sed separator "/" with "|"
 # This keeps us from escaping every forward slash. But don't confuse it with the pipe character in the same command!
-
+#cahnge results_summary##########################################################
 cat ${YSEQID}_result_summary.txt | \
     sed "s|<MTHAPLOGROUP>|${MTHAPLOGROUP}|g" | \
     sed "s|<YHAPLOGROUP>|${YFULLHG}|g" | \
@@ -369,32 +377,41 @@ mv ${YSEQID}_result_summary.txt ${YSEQID}_result_summary.txt.backup
 
 mv ${YSEQID}_result_summary.txt.tmp ${YSEQID}_result_summary.txt
 
+
+# get novel snps ##########################################################
 bcftools filter -i 'TYPE="snp" && QUAL>=30 && GT=="1/1" && DP4[2] + DP4[3] >=2 && (DP4[0] + DP4[1]) / DP < 0.1' chrY_called_${VCF_FILE}.gz | bcftools view -n -O z -s ^HARRY,ALIEN >chrY_novel_SNPs_${VCF_FILE}.gz
 tabix chrY_novel_SNPs_${VCF_FILE}.gz
 zcat chrY_novel_SNPs_${VCF_FILE}.gz | grep -v "##" >chrY_novel_SNPs_${VCF_FILE}.tsv
 echo "novel SNP calling completed"
 
+# process novel snps temlate##########################################################
 # Create Novel SNP template after checking for unreliable ranges and identity within Y Chromosome
 cp /genomes/0/script-templates/identityResolutionTemplateCreator.py .
 ${PYTHON} identityResolutionTemplateCreator.py -batch chrY_novel_SNPs_${VCF_FILE}.tsv chrY_novel_SNPs_${YSEQID}_hg38.tsv ${REF}
 
+
+#Indel calling##########################################################
 bcftools filter -i 'TYPE="indel" && QUAL>=30 && GT=="1/1" && DP4[2] + DP4[3] >=2 && (DP4[0] + DP4[1]) / DP < 0.1' chrY_called_${VCF_FILE}.gz | bcftools view -n -O z -s ^HARRY,ALIEN >chrY_INDELs_${VCF_FILE}.gz
 tabix chrY_INDELs_${VCF_FILE}.gz
 echo "INDEL calling completed"
 
+
+#get MTDNA differneces##########################################################
 ${PYTHON} getMTDNADifferences.py -update ${YSEQID}_result_summary.txt ${YSEQID}_result_summary.txt.out ${MTDNA_SNPS_FILE} ${PHYLOEQ_SNPS_FILE} ${DOWNSTR_SNPS_FILE} "The differences to the rCRS are" "phylo-equivalent SNPs to" "known downstream SNPs to" "novel SNPs found in sample"
 
 mv ${YSEQID}_result_summary.txt.out ${YSEQID}_result_summary.txt
 
+# add Alleles##########################################################
 ${PYTHON} getMTDNADifferences.py -addAlleles addAlleles.tsv ${MTDNA_SNPS_FILE} ${YSEQID} chrM_${VCF_FILE}.gz ${PHYLOEQ_SNPS_FILE} ${DOWNSTR_SNPS_FILE} chrY_${VCF_FILE}.gz
 
+# create Update Scipt##########################################################
 ${PYTHON} getMTDNADifferences.py -createUpdateScript addAlleles.tsv ${YSEQID}_result_summary.txt ${YSEQID}_result_summary.txt.out ${YSEQID} chrM_${VCF_FILE}.gz chrY_${VCF_FILE}.gz ${MTDNA_SNPS_FILE} ${PHYLOEQ_SNPS_FILE} ${DOWNSTR_SNPS_FILE} "The differences to the rCRS are" "phylo-equivalent SNPs to" "known downstream SNPs to" "novel SNPs found in sample" updateScript.sh
 
 
 chmod a+x updateScript.sh
 
 # Save mtDINA snps tomt YSEQID_mzDNA.fasta 
-
+###########################################################
 # Start rsyncing the large BAM file while we still continue with the analysis 
 cp /genomes/0/script-templates/rsync2webstore.sh .
 
@@ -409,15 +426,16 @@ if [[ $1 != "-noautosomal" ]]
 then
 	test -f "./23andMe_hg38_pipeline.sh" || cp /genomes/0/script-templates/23andMe_hg38_pipeline.sh .
 	test -f "./1240K_hg38_pipeline.sh" || cp /genomes/0/script-templates/1240K_hg38_pipeline.sh .
-
+#check aleele gegen große/ bekannte gen datanbanken ##########################################################
 	./1240K_hg38_pipeline.sh &
+####gegebenfalls rausschmeißen.#######################################################
 	./23andMe_hg38_pipeline.sh &
 
-
+###########################################################
 	# Parallel SNP calling by chromosome
 
 	PARAMC=0
-
+#get SNPs to all chromosomes##########################################################
 	bcftools mpileup -r chr1 -Ou -C ${PARAMC} -f $REF $BAMFILE_SORTED | bcftools call -O z --threads $NUM_THREADS -v -V indels -m -P 0 > chr1_${VCF_FILE}.gz &
 	bcftools mpileup -r chr2 -Ou -C ${PARAMC} -f $REF $BAMFILE_SORTED | bcftools call -O z --threads $NUM_THREADS -v -V indels -m -P 0 > chr2_${VCF_FILE}.gz &
 	bcftools mpileup -r chr3 -Ou -C ${PARAMC} -f $REF $BAMFILE_SORTED | bcftools call -O z --threads $NUM_THREADS -v -V indels -m -P 0 > chr3_${VCF_FILE}.gz &
@@ -444,6 +462,7 @@ then
 	bcftools mpileup -r chrY -Ou -C ${PARAMC} -f $REF $BAMFILE_SORTED | bcftools call -O z --threads $NUM_THREADS -v -V indels -m -P 0  > chrY_${VCF_FILE}.gz &
 	wait
 
+###########################################################combine all snps 
 	# Concatenate all chromosome VCFs to one big file
 	bcftools concat -O z chr[1-9]_${VCF_FILE}.gz chr[1-2][0-9]_${VCF_FILE}.gz chr[M,X-Y]_${VCF_FILE}.gz > ${VCF_FILE}.gz
 	tabix ${VCF_FILE}.gz
@@ -462,8 +481,7 @@ then
 
 
 
-
-
+fi
 	## Score STRs with lobSTR. 
 	#LOBSTR_MODEL="/usr/local/share/lobSTR/models/illumina_v3.pcrfree"
 	#LOBSTR_STRINFO="/genomes/0/refseq/hg19/lobstr_v3.0.2_hg19_strinfo.tab"
@@ -509,11 +527,11 @@ then
 
 	#cp /genomes/0/pipeline/2_downloaded/${YSEQID} /genomes/0/pipeline/3_mapped/
 
-fi
 
 cat ${YSEQID}_result_summary.txt
-
+#analyze STR and mtDNA indel##########################################################
 cp /genomes/0/script-templates/indelAnalyzer_hg38.sh .
+
 bash indelAnalyzer_hg38.sh
 
 #------------------------------------processing bamfile & snps done----------------------------------------------------#
