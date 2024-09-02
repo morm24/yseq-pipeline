@@ -1,0 +1,36 @@
+get_fastq_files.smk
+check_space_limitations.smk
+get_system_properties.smk
+create_password.smk
+prepare_summary_file.smk
+determine_fastq_data_type.smk
+map_fastq.smk
+sort_and_index_bam.smk
+get_mapping_statistics.smk
+create_easy_tview
+seperate_mtDNA_bam.smk
+seperate_chrY_bam.smk
+extract_mtDNA_consensus.smk
+get_newest_hg38_snps.smk
+extract_snps_from_bam.smk
+280 merge all snps (HARRY/ALIEN) and sample
+284 get differences between HARRY/ALIEN and SAMPLE
+288 remove HARRY/ALIEN from VCF
+292 extraxt ancestral & derived SNPS to seperate files
+300 preprocessing for clade finder
+313 Cladefinder (haplogroup check)
+339 parse cladefinder_output.csv
+344 get mtDNA snps
+353 get mtdna differences process
+358 extract mt haplogroup
+382 get novel snps (chrY)
+388 process novel snps
+394 Indel calling
+401 get mtdifferences update
+406 mtDifferences addAlleles
+409 mtDifferences create update script
+423 phenotyping hg38 pipeline
+440 extract snps to all chromosomes
+468 concat alls chromosome VCFs
+481 change dircetory reading and permissions and ownershipt 
+538 indelAnalyzer hg38
