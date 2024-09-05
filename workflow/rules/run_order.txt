@@ -4,8 +4,8 @@ get_system_properties.smk
 create_password.smk
 prepare_summary_file.smk
 determine_fastq_data_type.smk
-map_fastq.smk
-sort_and_index_bam.smk
+X   map_fastq.smk  
+X   sort_and_index_bam.smk
 get_mapping_statistics.smk
 create_easy_tview
 seperate_mtDNA_bam.smk

@@ -1,33 +1,39 @@
-REF     = "hg38"#config["REF"]
-YSEQID  = "63819"#config["YSEQID"]
 
-rule all:
+#why do wildcards do not work?
+rule map_bwa_hg38:
     input:
-        BAMFILE = f"{YSEQID}_bwa-mem_{REF}.bam"
-
-rule bwa_index:
-    input: 
-        "resources/{REF}/{REF}.fa"
-    output:
-        "resources/{REF}/{REF}.fa.amb",
-        "resources/{REF}/{REF}.fa.ann",
-        "resources/{REF}/{REF}.fa.bwt",
-        "resources/{REF}/{REF}.fa.pac",
-        "resources/{REF}/{REF}.fa.sa"
-    shell:
-        "bwa index {input}"
-
-
-rule bwa_mem:
-    input: 
-        READS_1 = f"{YSEQID}/fastq/{YSEQID}_R1.fastq.gz",
-        READS_2 = f"{YSEQID}/fastq/{YSEQID}_R2.fastq.gz",
-        REFSEQ     = "./resources/refseq/{REF}/{REF}.fa"
+        READS_1 = "resources/sample/YSEQID_R1.fastq.gz",
+        READS_2 = "resources/sample/YSEQID_R2.fastq.gz",
+        #
+        REF     = "resources/refseq/hg38/hg38.fa"
+        #"./resources/refseq/{REF}/{REF}.fa"
     output: 
-        BAMFILE = f"{YSEQID}_bwa-mem_{REF}.bam"
-    shell:"bwa mem {input} > {output}"
+        BAMFILE = "results/YSEQID_bwa-mem.bam"
+    params:
+        BWA = "-M -t 4"
+        #"-M -t $NUM_THREADS"
+    shell:
+        """
+        bwa mem -M -t {threads} {input.REF} {input.READS_1} {input.READS_2} | 
+        samtools view -@ {threads} -b -t {input.REF} -o {output.BAMFILE} - 
+        """
 
-
-
-
-
+rule sort_and_index:
+    input:
+        BAM = "results/YSEQID_bwa-mem.bam"
+    output:
+        SORTED_BAM = "results/YSEQID_sorted.bam",
+        BAI = "results/YSEQID_sorted.bam.bai",
+        IDXSTATS = "results/YSEQID_sorted.bam.idxstats.tsv"
+    params:
+        #how do I pass the snakemake num threads to the tool?
+        #NUM_THREADS = "-@ 4",
+        #SORTDIR = "-T /usr/local/geospiza/var/tmp/"
+        SORTDIR = "-T resources/temp/"
+        #OUTPUT =  "-o .SORTED_BAM}"
+    shell:
+        """
+        samtools sort -@ {threads} {params.SORTDIR}sorted -o {output.SORTED_BAM} {input.BAM}
+	    samtools index -@ {threads} {output.SORTED_BAM}
+	    samtools idxstats {output.SORTED_BAM} > {output.IDXSTATS}
+        """

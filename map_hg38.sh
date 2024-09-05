@@ -315,6 +315,7 @@ echo "Y haplogroup checked"
 echo "The 5 best hits are:"
 head -n 5 ${YSEQID}_cladeFinderOutput.csv
 
+#parse clade finder output#########################################################
 
 YFULLHG="unknown"
 YFULLPATH="unknown"
@@ -335,7 +336,7 @@ do
 done < ${YSEQID}_cladeFinderOutput.csv
 IFS=$OLDIFS
 
-
+##########################################################
 echo "YFULLHG: ${YFULLHG}"
 echo "YFULLPATH: ${YFULLPATH}"
 
@@ -354,9 +355,9 @@ cp /genomes/0/script-templates/getMTDNADifferences.py .
 MTDNA_SNPS_FILE=${YSEQID}_MTDNA_SNPS.tsv
 HAPLOGREP_JAR=haplogrep-2.1.25.jar
 cp /genomes/0/haplogrep/${HAPLOGREP_JAR} .
-
+#extract mt haplogroup #########################################################
 MTHAPLOGROUP=$(${PYTHON} getMTDNADifferences.py -process chrM_${VCF_FILE}.gz ${HAPLOGREP_JAR} ${MTDNA_SNPS_FILE})
-
+##########################################################
 
 # Update summary file with Y haplogroup:
 
@@ -410,7 +411,7 @@ ${PYTHON} getMTDNADifferences.py -createUpdateScript addAlleles.tsv ${YSEQID}_re
 
 chmod a+x updateScript.sh
 
-# Save mtDINA snps tomt YSEQID_mzDNA.fasta 
+# Save mtDNA snps tomt YSEQID_mzDNA.fasta 
 ###########################################################
 # Start rsyncing the large BAM file while we still continue with the analysis 
 cp /genomes/0/script-templates/rsync2webstore.sh .
@@ -419,9 +420,10 @@ cp /genomes/0/script-templates/rsync2webstore.sh .
 #test -f "./last_Y_hg38_pipeline.sh" || cp /genomes/0/script-templates/last_Y_hg38_pipeline.sh .	
 #./last_Y_hg38_pipeline.sh &
 
+##########################################################
 test -f "./phenotyping_hg38_pipeline.sh" || cp /genomes/0/script-templates/phenotyping_hg38_pipeline.sh .
 ./phenotyping_hg38_pipeline.sh
-
+#fliegen raus#########################################################
 if [[ $1 != "-noautosomal" ]]
 then
 	test -f "./23andMe_hg38_pipeline.sh" || cp /genomes/0/script-templates/23andMe_hg38_pipeline.sh .
@@ -431,7 +433,7 @@ then
 ####gegebenfalls rausschmeißen.#######################################################
 	./23andMe_hg38_pipeline.sh &
 
-###########################################################
+#Bis hier##########################################################
 	# Parallel SNP calling by chromosome
 
 	PARAMC=0
@@ -466,16 +468,17 @@ then
 	# Concatenate all chromosome VCFs to one big file
 	bcftools concat -O z chr[1-9]_${VCF_FILE}.gz chr[1-2][0-9]_${VCF_FILE}.gz chr[M,X-Y]_${VCF_FILE}.gz > ${VCF_FILE}.gz
 	tabix ${VCF_FILE}.gz
-
+##########################################################
 	# Delete no longer needed VCFs
 	rm -f chr[0-9]_${VCF_FILE}.gz chr[1-2][0-9]_${VCF_FILE}.gz chrX_${VCF_FILE}.gz
 
 	rm -f fastq.fastq
 	rm -f bed.bed
 	rm -f alignment.paf
-
+##########################################################
 	#samtools stats $BAMFILE_SORTED > ${BAMFILE_SORTED}.stats &
 
+##########################################################
 	chgrp -R users ./*
 	chmod -R g+rw ./*
 
@@ -532,8 +535,10 @@ cat ${YSEQID}_result_summary.txt
 #analyze STR and mtDNA indel##########################################################
 cp /genomes/0/script-templates/indelAnalyzer_hg38.sh .
 
+##########################################################
 bash indelAnalyzer_hg38.sh
 
+##########################################################
 #------------------------------------processing bamfile & snps done----------------------------------------------------#
 
 #------------------------------------ finish script;----------------------------------------------------#
