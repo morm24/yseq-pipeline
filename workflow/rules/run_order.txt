@@ -6,11 +6,11 @@ prepare_summary_file.smk
 determine_fastq_data_type.smk
 X   map_fastq.smk  
 X   sort_and_index_bam.smk
-get_mapping_statistics.smk
-create_easy_tview
-seperate_mtDNA_bam.smk
-seperate_chrY_bam.smk
-extract_mtDNA_consensus.smk
+Y get_mapping_statistics.smk
+X create_easy_tview
+x seperate_mtDNA_bam.smk
+x seperate_chrY_bam.smk
+x extract_mtDNA_consensus.smk
 get_newest_hg38_snps.smk
 extract_snps_from_bam.smk
 280 merge all snps (HARRY/ALIEN) and sample

@@ -1,17 +1,20 @@
 rule sort_and_index:
     input:
-        BAM = "YSEQID_bwa-mem.bam"
+        BAM = "results/{YSEQID}_bwa-mem_{REF}.bam"
     output:
-        SORTED_BAM = "YSEQID_sorted.bam",
-        BAI = "YSEQID_sorted.bam.bai",
-        IDXSTATS = "YSEQID_sorted.bam.idxstats.tsv"
+        SORTED_BAM = "results/{YSEQID}_bwa_mem_{REF}_sorted.bam",
+        BAI = "results/{YSEQID}_bwa_mem_{REF}_sorted.bam.bai",
+        IDXSTATS = "results/{YSEQID}_bwa_mem_{REF}_sorted.bam.idxstats.tsv"
     params:
-        NUM_THREADS = "-@ 4",
-        SORTDIR = "-T /usr/local/geospiza/var/tmp/'"
+        #how do I pass the snakemake num threads to the tool?
+        #NUM_THREADS = "-@ 4",
+        #SORTDIR = "-T /usr/local/geospiza/var/tmp/"
+        SORTDIR = "-T resources/temp/"
         #OUTPUT =  "-o .SORTED_BAM}"
+    threads: workflow.cores * 1
     shell:
-    """
-        samtools sort {params.NUM_THREADS} {params.SORTDIR}sorted -o {output.SORTED_BAM} {input.BAM}
-	    samtools index {params.NUM_THREADS} {output.SORTED_BAM}
+        """
+        samtools sort -@ {threads} {params.SORTDIR}sorted -o {output.SORTED_BAM} {input.BAM}
+	    samtools index -@ {threads} {output.SORTED_BAM}
 	    samtools idxstats {output.SORTED_BAM} > {output.IDXSTATS}
-    """
+        """

@@ -1,87 +1,37 @@
-
-#why do wildcards do not work?
-rule map_bwa_hg38:
+rule all:
     input:
-        READS_1 = "resources/sample/YSEQID_R1.fastq.gz",
-        READS_2 = "resources/sample/YSEQID_R2.fastq.gz",
-        #
-        REF     = "resources/refseq/hg38/hg38.fa"
-        #"./resources/refseq/{REF}/{REF}.fa"
-    output: 
-        BAMFILE = "results/YSEQID_bwa-mem.bam"
-    params:
-        BWA = "-M -t 4"
-        #"-M -t $NUM_THREADS"
-    shell:
-        """
-        bwa mem -M -t {threads} {input.REF} {input.READS_1} {input.READS_2} | 
-        samtools view -@ {threads} -b -t {input.REF} -o {output.BAMFILE} - 
-        """
-
-rule sort_and_index:
-    input:
-        BAM = "results/YSEQID_bwa-mem.bam"
+        TVIEW =         "results/tview_{YSEQID}_{REF}.sh",
+        YBAM =          "results/{YSEQID}_bwa-mem_{REF}_chrY.bam",
+        MTBAM =         "results/{YSEQID}_bwa-mem_{REF}_rCRS_chrM.bam",
+        SORTED_BAM =    "results/{YSEQID}_bwa_mem_{REF}_sorted.bam",
+        MT_CONSENSUS =  "results/{YSEQID}_{REF}_mtDNA.fasta",
+        STATS =         "results/{YSEQID}_{REF}_mapping_stats.txt",
+        VCF_chrY_RAW = "results/chrY_raw_{YSEQID}_{REF}.vcf.gz"
+    #    expand("{YSEQID}_results_summary.txt", YSEQID=IDS)
     output:
-        SORTED_BAM = "results/YSEQID_sorted.bam",
-        BAI = "results/YSEQID_sorted.bam.bai",
-        IDXSTATS = "results/YSEQID_sorted.bam.idxstats.tsv"
-    params:
-        #how do I pass the snakemake num threads to the tool?
-        #NUM_THREADS = "-@ 4",
-        #SORTDIR = "-T /usr/local/geospiza/var/tmp/"
-        SORTDIR = "-T resources/temp/"
-        #OUTPUT =  "-o .SORTED_BAM}"
+        FIN = "results/{YSEQID}_{REF}_finished.txt"
     shell:
-        """
-        samtools sort -@ {threads} {params.SORTDIR}sorted -o {output.SORTED_BAM} {input.BAM}
-	    samtools index -@ {threads} {output.SORTED_BAM}
-	    samtools idxstats {output.SORTED_BAM} > {output.IDXSTATS}
-        """
+        "echo 'All done!' > {output.FIN}"
+    #default_target: True
 
-rule get_mapping_statistics:
-    input:
-        BAM = "results/YSEQID_sorted.bam",
-        IDXSTATS =  "results/YSEQID_sorted.bam.idxstats.tsv"
 
-    output:
-        STATS = "results/YSEQID_mapping_stats.txt"
-    shell:
-        """
-        
-        "bamfile size: " > {output.STATS}
-        BAM_FILESIZE=`du -kh "{input.BAM}" | cut -f1`
-        echo "${{BAM_FILESIZE}}"   >> {output.STATS}
-        
-        "\navg read length: " >> {output.STATS}
-        READLENGTH=$(samtools bam2fq -@ {threads} {input.BAM} | head -n 400000 | awk '{{if(NR%4==2) {{count++; bases += length}} }} END{{print(bases/count)}}')
-        echo "${{READLENGTH}}" >> {output.STATS}
+#YSEQID = sample_list.values.tolist()
 
-        "\nnumber of mapped reads: " >> {output.STATS}
-        MAPPED_READS_HG38=$(perl addRows.pl "--column=2" "--filename={input.BAM}.idxstats.tsv")
-        echo "${{MAPPED_READS_HG38}}" >> {output.STATS}
-        
-        "\nnumber of mapped bases: " >> {output.STATS}
-        MAPPED_BASES_HG38=$(perl multiply.pl "--multiplicands=$MAPPED_READS_HG38,$READLENGTH" "-round")
-        echo "${{MAPPED_BASES_HG38}}" >> {output.STATS}
+wildcard_constraints:
+    REF = "hg38|hg19|hs1"
 
-        "\nnumber of unmapped reads: " >> {output.STATS}
-        UNMAPPED_READS=$(perl addRows.pl "--column=3" "--filename={input.BAM}.idxstats.tsv")
-        echo "${{UNMAPPED_READS}}" >> {output.STATS}
 
-        "\nnumber of unmapped bases: " >> {output.STATS}
-        UNMAPPED_BASES=$(perl multiply.pl "--multiplicands=$UNMAPPED_READS,$READLENGTH" "-round")
-        echo "${{UNMAPPED_BASES}}" >> {output.STATS}
+##### target rules #####
 
-        "\nnumber of sequenced bases: " >> {output.STATS}
-        SEQUENCED_BASES="$( printf '%s + %s\n' "$MAPPED_BASES_HG38" "$UNMAPPED_BASES" | bc )"
-        echo "${{SEQUENCED_BASES}}" >> {output.STATS}
+include: "rules/map_fastq.smk"
+include: "rules/get_mapping_statistics.smk"
+include: "rules/sort_and_index_bam.smk"
+include: "rules/create_easy_tview.smk"
+include: "rules/seperate_mt_bam.smk"
+include: "rules/extract_mtDNA_consensus.smk"
+include: "rules/seperate_chrY_bam.smk"
 
-        COVERAGE_HG38=$(awk -v rl="${{READLENGTH}}" '{{x+=$2;m+=$3}}END{{print m*rl/x "x"}}' < {input.IDXSTATS})
 
-        
-        
-        """
 
-#in place changes of files? 
-#how much should be writte in seperate python / perl scripts, how much is ok to do in bash (in rule)
+
 
