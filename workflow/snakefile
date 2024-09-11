@@ -6,7 +6,8 @@ rule all:
         SORTED_BAM =    "results/{YSEQID}_bwa_mem_{REF}_sorted.bam",
         MT_CONSENSUS =  "results/{YSEQID}_{REF}_mtDNA.fasta",
         STATS =         "results/{YSEQID}_{REF}_mapping_stats.txt",
-        VCF_chrY_RAW = "results/chrY_raw_{YSEQID}_{REF}.vcf.gz"
+        POSITIVE_TXT =  "results/{YSEQID}_{REF}_positives.txt",
+        NEGATIVE_TXT =  "results/{YSEQID}_{REF}_negatives.txt"
     #    expand("{YSEQID}_results_summary.txt", YSEQID=IDS)
     output:
         FIN = "results/{YSEQID}_{REF}_finished.txt"
@@ -30,6 +31,8 @@ include: "rules/create_easy_tview.smk"
 include: "rules/seperate_mt_bam.smk"
 include: "rules/extract_mtDNA_consensus.smk"
 include: "rules/seperate_chrY_bam.smk"
+include: "rules/get_newest_hg38_snps.smk"
+include: "rules/download_snps.smk"
 
 
 
