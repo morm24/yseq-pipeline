@@ -1,0 +1,12 @@
+name: extract_all_SNPS_env.yml
+channels:
+  - bioconda
+  - conda-forge
+  - default
+dependencies: 
+  - bcftools=1.17
+  - tabix=1.10
+
+
+# https://www.anaconda.com/blog/a-faster-conda-for-a-growing-community
+

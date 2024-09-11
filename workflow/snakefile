@@ -1,26 +1,31 @@
+#snakemake -c 32 -id 63819 -ref hg38
+
+import pandas as pd 
+
+samples_df = pd.DataFrame(pd.read_csv("./config/samples.csv"))
+yseqids = samples_df["YSEQID"].to_list()
+refs = samples_df["REF"].to_list()  # Fill missing values with 'hg38'   #.fillna("hg38")
+
+# Create a list of tuples for wildcards
+wildcards = [(yseqid, ref) for yseqid, ref in zip(yseqids, refs)]
+
+
 rule all:
     input:
-        TVIEW =         "results/tview_{YSEQID}_{REF}.sh",
-        YBAM =          "results/{YSEQID}_bwa-mem_{REF}_chrY.bam",
-        MTBAM =         "results/{YSEQID}_bwa-mem_{REF}_rCRS_chrM.bam",
-        SORTED_BAM =    "results/{YSEQID}_bwa_mem_{REF}_sorted.bam",
-        MT_CONSENSUS =  "results/{YSEQID}_{REF}_mtDNA.fasta",
-        STATS =         "results/{YSEQID}_{REF}_mapping_stats.txt",
-        POSITIVE_TXT =  "results/{YSEQID}_{REF}_positives.txt",
-        NEGATIVE_TXT =  "results/{YSEQID}_{REF}_negatives.txt"
-    #    expand("{YSEQID}_results_summary.txt", YSEQID=IDS)
-    output:
-        FIN = "results/{YSEQID}_{REF}_finished.txt"
-    shell:
-        "echo 'All done!' > {output.FIN}"
-    #default_target: True
+        expand("results/tview_{YSEQID}_{REF}.sh", zip, YSEQID=yseqids, REF=refs), # pick row-wise 
+        expand("results/{YSEQID}_bwa-mem_{REF}_chrY.bam", zip, YSEQID=yseqids, REF=refs),
+        expand("results/{YSEQID}_bwa-mem_{REF}_rCRS_chrM.bam", zip, YSEQID=yseqids, REF=refs),
+        #expand("results/{YSEQID}_bwa_mem_{REF}_sorted.bam", zip, YSEQID=yseqids, REF=refs),
+        expand("results/{YSEQID}_{REF}_mtDNA.fasta", zip, YSEQID=yseqids, REF=refs),
+        expand("results/{YSEQID}_{REF}_mapping_stats.txt", zip, YSEQID=yseqids, REF=refs),
+        expand("results/{YSEQID}_{REF}_positives.txt", zip, YSEQID=yseqids, REF=refs),
+        expand("results/{YSEQID}_{REF}_negatives.txt", zip, YSEQID=yseqids, REF=refs),
+        expand("results/{YSEQID}_{REF}haploData.csv", zip, YSEQID=yseqids, REF=refs),
 
 
-#YSEQID = sample_list.values.tolist()
 
 wildcard_constraints:
     REF = "hg38|hg19|hs1"
-
 
 ##### target rules #####
 
@@ -32,9 +37,13 @@ include: "rules/seperate_mt_bam.smk"
 include: "rules/extract_mtDNA_consensus.smk"
 include: "rules/seperate_chrY_bam.smk"
 include: "rules/get_newest_hg38_snps.smk"
-include: "rules/download_snps.smk"
+include: "rules/cladefinder.smk"
 
 
 
 
 
+
+
+
+#snakemake -c 32 -id 63819 -ref hg38

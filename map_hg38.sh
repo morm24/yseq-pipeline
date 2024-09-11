@@ -299,8 +299,8 @@ then
 	echo "ancestral & derived filters completed"
 #preprocessing for clade finder##########################################################
 	# Find the Y haplogroup
-	bcftools query -f '%ID,' chrY_derived_${VCF_FILE}.gz | sed ':a;N;$!ba;s/\n//g' > ${YSEQID}_positives.txt &
-	bcftools query -f '%ID,' chrY_ancestral_${VCF_FILE}.gz | sed ':a;N;$!ba;s/\n//g' > ${YSEQID}_negatives.txt &
+	bcftools query -f '%ID,' chrY_derived_${VCF_FILE}.gz | sed ':a;N;$!ba;s/\\n//g' > ${YSEQID}_positives.txt &
+	bcftools query -f '%ID,' chrY_ancestral_${VCF_FILE}.gz | sed ':a;N;$!ba;s/\\n//g' > ${YSEQID}_negatives.txt &
 	wait
 fi
 
@@ -336,7 +336,6 @@ do
 done < ${YSEQID}_cladeFinderOutput.csv
 IFS=$OLDIFS
 
-##########################################################
 echo "YFULLHG: ${YFULLHG}"
 echo "YFULLPATH: ${YFULLPATH}"
 
