@@ -8,8 +8,8 @@ rule download_snps:
             wget -O {output[0]} http://ybrowse.org/gbrowse2/gff/snps_hg38.vcf.gz
             wget -O {output[1]} http://ybrowse.org/gbrowse2/gff/snps_hg38.vcf.gz.tbi
         #elif [ "{wildcards.REF}" == "hs1" ]; then
-            #wget -O {output.SNPS} http://ybrowse.org/gbrowse2/gff/snps_hs1.vcf.gz                  still needs to be created
-            #wget -O {output.SNPS_TBI} http://ybrowse.org/gbrowse2/gff/snps_hs1.vcf.gz.tbi          still needs to be created
+            wget -O {output.SNPS} http://hs1.ybrowse.org/gbrowse2/gff/snps_hs1.vcf.gz         
+            wget -O {output.SNPS_TBI} http://hs1.ybrowse.org/gbrowse2/gff/snps_hs1.vcf.gz.tbi 
         else
             echo "Invalid reference: {wildcards.REF}"
             exit 1
@@ -30,7 +30,7 @@ rule get_all_SNPs_Sample:
 	    tabix {output.RAW_VCF}
         """
 
-#Human Ancestral Reconstructed Reference of th Y_chromosome; ALIEN ~ ALL Snips are devived allele
+#HARRY = Human Ancestral Reconstructed Reference of th Y_chromosome; ALIEN ~ ALL Snips are devived allele
 rule merge_SNPS_HARRY_ALIEN_SAMPLE:
     input:
         SNPS =          "resources/tmp/snps_{REF}.vcf.gz",

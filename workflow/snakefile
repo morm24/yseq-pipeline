@@ -18,8 +18,8 @@ rule all:
         #expand("results/{YSEQID}_bwa_mem_{REF}_sorted.bam", zip, YSEQID=yseqids, REF=refs),
         expand("results/{YSEQID}_{REF}_mtDNA.fasta", zip, YSEQID=yseqids, REF=refs),
         expand("results/{YSEQID}_{REF}_mapping_stats.txt", zip, YSEQID=yseqids, REF=refs),
-        expand("results/{YSEQID}_{REF}_positives.txt", zip, YSEQID=yseqids, REF=refs),
-        expand("results/{YSEQID}_{REF}_negatives.txt", zip, YSEQID=yseqids, REF=refs),
+        #expand("results/{YSEQID}_{REF}_positives.txt", zip, YSEQID=yseqids, REF=refs),
+        #expand("results/{YSEQID}_{REF}_negatives.txt", zip, YSEQID=yseqids, REF=refs),
         expand("results/{YSEQID}_{REF}haploData.csv", zip, YSEQID=yseqids, REF=refs),
 
 
@@ -36,7 +36,7 @@ include: "rules/create_easy_tview.smk"
 include: "rules/seperate_mt_bam.smk"
 include: "rules/extract_mtDNA_consensus.smk"
 include: "rules/seperate_chrY_bam.smk"
-include: "rules/get_newest_hg38_snps.smk"
+include: "rules/get_newest_snps.smk"
 include: "rules/cladefinder.smk"
 
 

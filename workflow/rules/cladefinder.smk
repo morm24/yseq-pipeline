@@ -1,13 +1,20 @@
-rule preprocessing_cladefinder:
+rule preprocessing_cladefinder_derived:
     input:
         DERIVED_VCF =   "results/chrY_derived_{YSEQID}_{REF}.vcf.gz",
-        ANCESTRAL_VCF = "results/chrY_ancestral_{YSEQID}_{REF}.vcf.gz"
     output:
         POSITIVE_TXT =  "results/{YSEQID}_{REF}_positives.txt",
-        NEGATIVE_TXT =  "results/{YSEQID}_{REF}_negatives.txt"
     shell:
         """
 	    bcftools query -f '%ID,' {input.DERIVED_VCF} | sed ':a;N;$!ba;s/\\n//g' > {output.POSITIVE_TXT} &
+        """
+
+rule preprocessing_cladefinder_ancestral:
+    input:
+        ANCESTRAL_VCF = "results/chrY_ancestral_{YSEQID}_{REF}.vcf.gz"
+    output:
+        NEGATIVE_TXT =  "results/{YSEQID}_{REF}_negatives.txt"
+    shell:
+        """
 	    bcftools query -f '%ID,' {input.ANCESTRAL_VCF} | sed ':a;N;$!ba;s/\\n//g' > {output.NEGATIVE_TXT} 
         """
 
