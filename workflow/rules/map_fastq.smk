@@ -12,7 +12,8 @@ rule map_bwa:
         READS_1 = "resources/sample/{YSEQID}_R1.fastq.gz",
         READS_2 = "resources/sample/{YSEQID}_R2.fastq.gz",
         #
-        REFSEQ     = "resources/refseq/{REF}/{REF}.fa"
+        REFSEQ  = "resources/refseq/{REF}/{REF}.fa"
+        INDEX   = "resources/refseq/{REF}/{REF}.fa.fai"
         #"./resources/refseq/{REF}/{REF}.fa"
     output: 
         BAM = "results/{YSEQID}_bwa-mem_{REF}.bam"
