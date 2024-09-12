@@ -30,6 +30,7 @@ rule get_all_SNPs_Sample:
 	    tabix {output.RAW_VCF}
         """
 
+#Human Ancestral Reconstructed Reference of th Y_chromosome; ALIEN ~ ALL Snips are devived allele
 rule merge_SNPS_HARRY_ALIEN_SAMPLE:
     input:
         SNPS =          "resources/tmp/snps_{REF}.vcf.gz",
