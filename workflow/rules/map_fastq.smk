@@ -1,4 +1,13 @@
-rule map_bwa_hg38:
+rule index_refseq:
+    input:
+        REFSEQ = "resources/refseq/{REF}/{REF}.fa"
+    output:
+        INDEX = "resources/refseq/{REF}/{REF}.fa.fai"
+    shell:
+        """
+        bwa index {input.REFSEQ}
+        """
+rule map_bwa:
     input:
         READS_1 = "resources/sample/{YSEQID}_R1.fastq.gz",
         READS_2 = "resources/sample/{YSEQID}_R2.fastq.gz",

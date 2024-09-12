@@ -1,9 +1,8 @@
-
 #reference
-resources/refseq/*/*
-!refseq/readme.md
+resources/refseq/**/*.fa*
+!resources/refseq/hg38.fa
 #results
 results/*
-
+log/*
 #snakemake
-.snkemake
+.snakemake/
