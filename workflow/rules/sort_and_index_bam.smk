@@ -9,7 +9,7 @@ rule sort_and_index:
         #how do I pass the snakemake num threads to the tool?
         #NUM_THREADS = "-@ 4",
         #SORTDIR = "-T /usr/local/geospiza/var/tmp/"
-        SORTDIR = "-T resources/temp/"
+        SORTDIR = "-T resources/tmp/"
         #OUTPUT =  "-o .SORTED_BAM}"
     threads: workflow.cores * 1
     shell:

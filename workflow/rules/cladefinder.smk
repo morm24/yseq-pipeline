@@ -35,7 +35,8 @@ rule save_HG:
     input:
         CF_CSV =        "results/{YSEQID}_{REF}cladeFinderOutput.csv",
     output:
-        HAPLO_DATA =    "results/{YSEQID}_{REF}haploData.csv"    
+        HAPLO_DATA =    "results/{YSEQID}_{REF}haploData.txt",
+        HAPLO_GROUP =   temp("results/{YSEQID}_{REF}haploGroup")
     run:
         # Initialize variables
         YFULLHG = "unknown"
@@ -59,3 +60,26 @@ rule save_HG:
         with open(output_file, 'w') as file:
             file.write(f"YFULLHG: {YFULLHG}\n")
             file.write(f"YFULLPATH: {YFULLPATH}\n")
+        with open(output.HAPLO_GROUP, 'w') as file:
+            file.write(f"{YFULLHG}\n")  
+
+rule get_equivalent_and_downstream_SNPS:
+    input:
+        YFULLTREE =     "resources/tree/latest_YFull_YTree.json",
+        POSITIVES_TXT = "results/{YSEQID}_{REF}_positives.txt",
+        NEGATIVES_TXT = "results/{YSEQID}_{REF}_negatives.txt",
+        CLEANED_VCF =   "results/chrY_cleaned_{YSEQID}_{REF}.vcf.gz",
+        IDXSTATS =      "results/{YSEQID}_bwa_mem_{REF}_sorted.bam.idxstats.tsv",
+        HAPLO_GROUP =   "results/{YSEQID}_{REF}haploGroup"  
+
+
+    output:
+        PHYLOEQ_SNPS = "results/{YSEQID}_{REF}_PHYLOEQ_SNPS.tsv",
+        DOWNSTR_SNPS = "results/{YSEQID}_{REF}_DOWNSTR_SNPS.tsv"
+    shell:
+        """
+        YFULLHG=$(head -n 1 {input.HAPLO_GROUP})
+        python3 workflow/scripts/script_templates/getEquivalentAndDownstreamSNPs.py {input.YFULLTREE} "$YFULLHG" {input.CLEANED_VCF} {input.POSITIVES_TXT} {input.NEGATIVES_TXT} {output.PHYLOEQ_SNPS} {output.DOWNSTR_SNPS} {input.IDXSTATS}
+
+        """
+    

@@ -92,4 +92,35 @@ rule extract_derived_SNPS:
         tabix {output.ANCESTRAL_VCF}
         """
 
-
+rule get_novel_SNPS:
+    input:
+        CALLED_VCF =    "results/chrY_called_{YSEQID}_{REF}.vcf.gz",
+    output:
+        NOVEL_VCF =     temp("results/chrY_novel_SNPs_{YSEQID}_{REF}.gz"),
+        NOVEL_VCF_TSV =     "results/chrY_novel_SNPs_{YSEQID}_{REF}.vcf.tsv"
+    shell:
+        """
+        bcftools filter -i 'TYPE="snp" && QUAL>=30 && GT=="1/1" && DP4[2] + DP4[3] >=2 && (DP4[0] + DP4[1]) / DP < 0.1' {input.CALLED_VCF} | bcftools view -n -O z -s ^HARRY,ALIEN > {output.NOVEL_VCF}
+        tabix {output.NOVEL_VCF}
+        zcat {output.NOVEL_VCF} | grep -v "##" >{output.NOVEL_VCF_TSV}
+        """
+rule identity_resolution:
+    input:
+        NOVEL_VCF_TSV =     "results/chrY_novel_SNPs_{YSEQID}_{REF}.vcf.tsv",
+        REFSEQ =        "resources/refseq/{REF}/{REF}.fa"
+    output:
+        NOVEL_TSV =     "results/chrY_novel_SNPs_{YSEQID}_{REF}.tsv"
+    shell:
+        """
+        python3 identityResolutionTemplateCreator.py -batch {input.NOVEL_VCF_TSV} {output.NOVEL_TSV} {input.REFSEQ}
+        """
+rule indel_calling:
+    input:
+        CALLED_VCF =    "results/chrY_called_{YSEQID}_{REF}.vcf.gz"
+    output:
+        INDEL_VCF =     "results/chrY_INDELs_{YSEQID}_{REF}.gz"
+    shell:
+        """
+        bcftools filter -i 'TYPE="indel" && QUAL>=30 && GT=="1/1" && DP4[2] + DP4[3] >=2 && (DP4[0] + DP4[1]) / DP < 0.1' {input.CALLED_VCF} | bcftools view -n -O z -s ^HARRY,ALIEN > {output.INDEL_VCF}
+         tabix {output.INDEL_VCF}
+        """
