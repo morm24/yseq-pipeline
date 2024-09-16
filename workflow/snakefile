@@ -19,39 +19,37 @@ rule all:
         expand("results/tview_{YSEQID}_{REF}.sh",               zip, YSEQID=yseqids, REF=refs), # pick row-wise 
         expand("results/{YSEQID}_bwa-mem_{REF}_chrY.bam",       zip, YSEQID=yseqids, REF=refs),
         expand("results/{YSEQID}_bwa-mem_{REF}_rCRS_chrM.bam",  zip, YSEQID=yseqids, REF=refs),
-        #expand("results/{YSEQID}_bwa_mem_{REF}_sorted.bam",    zip, YSEQID=yseqids, REF=refs),
-        expand("results/{YSEQID}_{REF}_mtDNA.fasta",            zip, YSEQID=yseqids, REF=refs),
+        #expand("results/{YSEQID}_bwa_mem_{REF}_sorted.bam",     zip, YSEQID=yseqids, REF=refs),
+        #expand("results/{YSEQID}_{REF}_mtDNA.fasta",            zip, YSEQID=yseqids, REF=refs),
         expand("results/{YSEQID}_{REF}_mapping_stats.txt",      zip, YSEQID=yseqids, REF=refs),
         #expand("results/{YSEQID}_{REF}_positives.txt",         zip, YSEQID=yseqids, REF=refs),
         #expand("results/{YSEQID}_{REF}_negatives.txt",         zip, YSEQID=yseqids, REF=refs),
-        expand("results/{YSEQID}_{REF}haploData.txt",           zip, YSEQID=yseqids, REF=refs),
+        #expand("results/{YSEQID}_{REF}haploData.txt",           zip, YSEQID=yseqids, REF=refs),
         expand("results/{YSEQID}_{REF}_MTDNA_SNPS.tsv",         zip, YSEQID=yseqids, REF=refs),
         expand("results/chrY_INDELs_{YSEQID}_{REF}.gz",         zip, YSEQID=yseqids, REF=refs),
         expand("results/{YSEQID}_{REF}_PHYLOEQ_SNPS.tsv",       zip, YSEQID=yseqids, REF=refs),
         expand("results/{YSEQID}_{REF}_DOWNSTR_SNPS.tsv",       zip, YSEQID=yseqids, REF=refs),
-        expand("results/{YSEQID}_{REF}_result_summary.txt",     zip, YSEQID=yseqids, REF=refs),
+        #expand("results/{YSEQID}_{REF}_result_summary.txt",     zip, YSEQID=yseqids, REF=refs),
         expand("results/all_chr_snps_{YSEQID}_{REF}.vcf.gz",    zip, YSEQID=yseqids, REF=refs),
-        expand("results/{YSEQID}_{REF}_update.sh",              zip, YSEQID=yseqids, REF=refs),
+        #expand("results/{YSEQID}_{REF}_update.sh",              zip, YSEQID=yseqids, REF=refs),
         expand("results/chrY_novel_SNPs_{YSEQID}_{REF}.tsv",    zip, YSEQID=yseqids, REF=refs),
+        expand("results/{YSEQID}_{REF}_addAlleles.tsv",         zip, YSEQID=yseqids, REF=refs)
 
 
 
 wildcard_constraints:
-    REF = "hg38|hg19|hs1"
+    REF = "hg38|hg19|hs1",
+    YSEQID = r"\d{1,6}"
 
 ##### target rules #####
 
 include: "rules/map_fastq.smk"
-include: "rules/get_mapping_statistics.smk"
-include: "rules/sort_and_index_bam.smk"
 include: "rules/create_easy_tview.smk"
-include: "rules/seperate_mt_bam.smk"
-include: "rules/extract_mtDNA_consensus.smk"
-include: "rules/seperate_chrY_bam.smk"
+include: "rules/seperate_bam.smk"
 include: "rules/get_sample_snps.smk"
 include: "rules/cladefinder.smk"
 include: "rules/get_mtdifferences.smk"
-include: "rules/all_chr_snps.smk"
+include: "rules/all_chr_snps_onerule.smk"
 
 
 

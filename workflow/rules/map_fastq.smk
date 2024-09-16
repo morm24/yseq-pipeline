@@ -35,3 +35,37 @@ rule map_bwa:
         bwa mem {params.BWA} {threads} {input.REFSEQ} {input.READS_1} {input.READS_2} | 
         samtools view -@ {threads} -b -t {input.REFSEQ} -o {output.BAM} - 
         """
+rule sort_and_index:
+    input:
+        BAM = "results/{YSEQID}_bwa-mem_{REF}.bam"
+    output:
+        SORTED_BAM = "results/{YSEQID}_bwa_mem_{REF}_sorted.bam",
+        BAI = "results/{YSEQID}_bwa_mem_{REF}_sorted.bam.bai",
+        IDXSTATS = "results/{YSEQID}_bwa_mem_{REF}_sorted.bam.idxstats.tsv"
+    params:
+        #how do I pass the snakemake num threads to the tool?
+        #NUM_THREADS = "-@ 4",
+        #SORTDIR = "-T /usr/local/geospiza/var/tmp/"
+        SORTDIR = "-T resources/tmp/"
+        #OUTPUT =  "-o .SORTED_BAM}"
+    threads: workflow.cores * 1
+    shell:
+        """
+        samtools sort -@ {threads} {params.SORTDIR}sorted -o {output.SORTED_BAM} {input.BAM}
+	    samtools index -@ {threads} {output.SORTED_BAM}
+	    samtools idxstats {output.SORTED_BAM} > {output.IDXSTATS}
+        """
+#swap the code with bamstaistics or sth. like that
+rule get_mapping_statistics:
+    input:
+        BAM = "results/{YSEQID}_bwa_mem_{REF}_sorted.bam",
+        IDXSTATS =  "results/{YSEQID}_bwa_mem_{REF}_sorted.bam.idxstats.tsv"
+
+    output:
+        STATS = "results/{YSEQID}_{REF}_mapping_stats.txt"
+    threads: 
+        workflow.cores * 1
+    shell:
+        """
+        bamstats -u -i {input.BAM} -o {output.STATS}
+        """

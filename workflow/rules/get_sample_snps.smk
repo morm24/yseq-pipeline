@@ -112,7 +112,7 @@ rule identity_resolution:
         NOVEL_TSV =     "results/chrY_novel_SNPs_{YSEQID}_{REF}.tsv"
     shell:
         """
-        python3 identityResolutionTemplateCreator.py -batch {input.NOVEL_VCF_TSV} {output.NOVEL_TSV} {input.REFSEQ}
+        python3 workflow/scripts/script_templates/identityResolutionTemplateCreator.py -batch {input.NOVEL_VCF_TSV} {output.NOVEL_TSV} {input.REFSEQ}
         """
 rule indel_calling:
     input:
