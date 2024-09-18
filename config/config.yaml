@@ -1,2 +1,12 @@
 OUTDIR: "results/"
 TMPDIR: "tmp/"
+# Declared your mapper of choice here
+# choose "bwa" or "minimap2" 
+MAPPER: "bwa" 
+# Choose readtype between "short" or "nanopore"
+READS:  "short" 
+
+ENV_PATH: "workflow/envs"
+SAMPLE_PATH: "resources/sample"
+# ----------
+results_refseq: "results/ref"

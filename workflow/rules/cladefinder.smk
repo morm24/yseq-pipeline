@@ -1,8 +1,8 @@
 rule preprocessing_cladefinder_derived:
     input:
-        DERIVED_VCF =   "results/chrY_derived_{YSEQID}_{REF}.vcf.gz",
+        DERIVED_VCF =   results_prefix / "chrY_derived_{YSEQID}_{REF}.vcf.gz",
     output:
-        POSITIVE_TXT =  "results/{YSEQID}_{REF}_positives.txt",
+        POSITIVE_TXT =  results_prefix / "{YSEQID}_{REF}_positives.txt",
     shell:
         """
 	    bcftools query -f '%ID,' {input.DERIVED_VCF} | sed ':a;N;$!ba;s/\\n//g' > {output.POSITIVE_TXT} &
@@ -10,9 +10,9 @@ rule preprocessing_cladefinder_derived:
 
 rule preprocessing_cladefinder_ancestral:
     input:
-        ANCESTRAL_VCF = "results/chrY_ancestral_{YSEQID}_{REF}.vcf.gz"
+        ANCESTRAL_VCF = results_prefix / "chrY_ancestral_{YSEQID}_{REF}.vcf.gz"
     output:
-        NEGATIVE_TXT =  "results/{YSEQID}_{REF}_negatives.txt"
+        NEGATIVE_TXT =  results_prefix / "{YSEQID}_{REF}_negatives.txt"
     shell:
         """
 	    bcftools query -f '%ID,' {input.ANCESTRAL_VCF} | sed ':a;N;$!ba;s/\\n//g' > {output.NEGATIVE_TXT} 
@@ -20,11 +20,11 @@ rule preprocessing_cladefinder_ancestral:
 
 rule check_HG:
     input:
-        POSITIVE_TXT =  "results/{YSEQID}_{REF}_positives.txt",
-        NEGATIVE_TXT =  "results/{YSEQID}_{REF}_negatives.txt",
+        POSITIVE_TXT =  results_prefix / "{YSEQID}_{REF}_positives.txt",
+        NEGATIVE_TXT =  results_prefix / "{YSEQID}_{REF}_negatives.txt",
         YFULLTREE =     "resources/tree/latest_YFull_YTree.json"
     output:
-        temp("results/{YSEQID}_{REF}cladeFinderOutput.csv"),
+        temp(results_prefix / "{YSEQID}_{REF}cladeFinderOutput.csv"),
         
     shell:
         """
@@ -33,10 +33,10 @@ rule check_HG:
 
 rule save_HG:
     input:
-        CF_CSV =        "results/{YSEQID}_{REF}cladeFinderOutput.csv",
+        CF_CSV =        results_prefix / "{YSEQID}_{REF}cladeFinderOutput.csv",
     output:
-        HAPLO_DATA =    "results/{YSEQID}_{REF}haploData.txt",
-        HAPLO_GROUP =   temp("results/{YSEQID}_{REF}haploGroup")
+        HAPLO_DATA =    results_prefix / "{YSEQID}_{REF}haploData.txt",
+        HAPLO_GROUP =   temp(results_prefix / "{YSEQID}_{REF}haploGroup")
     run:
         # Initialize variables
         YFULLHG = "unknown"
@@ -66,16 +66,16 @@ rule save_HG:
 rule get_equivalent_and_downstream_SNPS:
     input:
         YFULLTREE =     "resources/tree/latest_YFull_YTree.json",
-        POSITIVES_TXT = "results/{YSEQID}_{REF}_positives.txt",
-        NEGATIVES_TXT = "results/{YSEQID}_{REF}_negatives.txt",
-        CLEANED_VCF =   "results/chrY_cleaned_{YSEQID}_{REF}.vcf.gz",
-        IDXSTATS =      "results/{YSEQID}_bwa_mem_{REF}_sorted.bam.idxstats.tsv",
-        HAPLO_GROUP =   "results/{YSEQID}_{REF}haploGroup"  
+        POSITIVES_TXT = results_prefix / "{YSEQID}_{REF}_positives.txt",
+        NEGATIVES_TXT = results_prefix / "{YSEQID}_{REF}_negatives.txt",
+        CLEANED_VCF =   results_prefix / "chrY_cleaned_{YSEQID}_{REF}.vcf.gz",
+        IDXSTATS =      results_prefix / "{YSEQID}_bwa_mem_{REF}_sorted.bam.idxstats.tsv",
+        HAPLO_GROUP =   results_prefix / "{YSEQID}_{REF}haploGroup"  
 
 
     output:
-        PHYLOEQ_SNPS = "results/{YSEQID}_{REF}_PHYLOEQ_SNPS.tsv",
-        DOWNSTR_SNPS = "results/{YSEQID}_{REF}_DOWNSTR_SNPS.tsv"
+        PHYLOEQ_SNPS = results_prefix / "{YSEQID}_{REF}_PHYLOEQ_SNPS.tsv",
+        DOWNSTR_SNPS = results_prefix / "{YSEQID}_{REF}_DOWNSTR_SNPS.tsv"
     shell:
         """
         YFULLHG=$(head -n 1 {input.HAPLO_GROUP})

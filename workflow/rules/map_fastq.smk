@@ -1,32 +1,73 @@
-rule index_refseq:
+rule index_refseq_minimap2:
     input:
-        REFSEQ = "resources/refseq/{REF}/{REF}.fa"
+        REFSEQ = resources_prefix / "{REF}/{REF}.fa"
     output:
-        BWT = "resources/refseq/{REF}/{REF}.fa.bwt",
-        AMB = "resources/refseq/{REF}/{REF}.fa.amb",
-        ANN = "resources/refseq/{REF}/{REF}.fa.ann",
-        PAC = "resources/refseq/{REF}/{REF}.fa.pac",
-        SA  = "resources/refseq/{REF}/{REF}.fa.sa"
+        INDEX = resources_prefix / "{REF}/{REF}.fa.mmi"
+    log:
+        log_prefix / "{REF}/{REF}.log"
+    conda:
+        env_path / "mapping.yaml"
+    shell:
+        """
+        minimap2 index {input.REFSEQ}
+        """
 
+rule map_minimap2:
+    input:
+        READS_1 = sample_prefix / "{YSEQID}_R1.fastq.gz",
+        READS_2 = sample_prefix / "{YSEQID}_R2.fastq.gz",
+        #
+        INDEX  = resources_prefix / "{REF}/{REF}.fa.mmi",
+        REFSEQ = resources_prefix / "{REF}/{REF}.fa"
+        #"./resources/refseq/{REF}/{REF}.fa"
+    output: 
+        BAM = results_prefix / "{YSEQID}_minimap2_{REF}.bam"
+    conda:
+        env_path / "mapping.yaml"
+    params:
+        "-a -x sr -t " if (config["READS"] == "short") else "-ax map-ont -t" #if (config["READS"] == "nanopore") "-ax map-ont -t" else "-at"#-t has to be last!
+    threads: workflow.cores
+    shell:
+        """
+        bwa mem {params} {threads} {input.INDEX} {input.READS_1} {input.READS_2} | 
+        samtools view -@ {threads} -b -t {input.REFSEQ} -o {output.BAM} - 
+        """
+
+
+rule index_refseq_bwa:
+    input:
+        REFSEQ = resources_prefix / "{REF}/{REF}.fa"
+    output:
+        BWT = resources_prefix / "{REF}/{REF}.fa.bwt",
+        AMB = resources_prefix / "{REF}/{REF}.fa.amb",
+        ANN = resources_prefix / "{REF}/{REF}.fa.ann",
+        PAC = resources_prefix / "{REF}/{REF}.fa.pac",
+        SA  = resources_prefix / "{REF}/{REF}.fa.sa"
+    log:
+        log_prefix / "{REF}/{REF}.log"
+    conda:
+        env_path / "mapping.yaml"
     shell:
         """
         bwa index {input.REFSEQ}
         """
+
 rule map_bwa:
     input:
-        READS_1 = "resources/sample/{YSEQID}_R1.fastq.gz",
-        READS_2 = "resources/sample/{YSEQID}_R2.fastq.gz",
+        READS_1 = sample_prefix / "{YSEQID}_R1.fastq.gz",
+        READS_2 = sample_prefix / "{YSEQID}_R2.fastq.gz",
         #
-        REFSEQ  = "resources/refseq/{REF}/{REF}.fa",
-        BWT = "resources/refseq/{REF}/{REF}.fa.bwt",
-        AMB = "resources/refseq/{REF}/{REF}.fa.amb",
-        ANN = "resources/refseq/{REF}/{REF}.fa.ann",
-        PAC = "resources/refseq/{REF}/{REF}.fa.pac",
-        SA  = "resources/refseq/{REF}/{REF}.fa.sa"
+        REFSEQ  = resources_prefix / "{REF}/{REF}.fa",
+        BWT = resources_prefix / "{REF}/{REF}.fa.bwt",
+        AMB = resources_prefix / "{REF}/{REF}.fa.amb",
+        ANN = resources_prefix / "{REF}/{REF}.fa.ann",
+        PAC = resources_prefix / "{REF}/{REF}.fa.pac",
+        SA  = resources_prefix / "{REF}/{REF}.fa.sa"
         #"./resources/refseq/{REF}/{REF}.fa"
     output: 
-        BAM = "results/{YSEQID}_bwa-mem_{REF}.bam"
-        
+        BAM = results_prefix / "{YSEQID}_bwa-mem_{REF}.bam"
+    conda:
+        env_path / "mapping.yaml"
     params:
         BWA = "-M -t " #-t has to be last!
     threads: workflow.cores
@@ -35,13 +76,16 @@ rule map_bwa:
         bwa mem {params.BWA} {threads} {input.REFSEQ} {input.READS_1} {input.READS_2} | 
         samtools view -@ {threads} -b -t {input.REFSEQ} -o {output.BAM} - 
         """
+
 rule sort_and_index:
     input:
-        BAM = "results/{YSEQID}_bwa-mem_{REF}.bam"
+        BAM = results_prefix / "{YSEQID}_bwa-mem_{REF}.bam" if (config["MAPPER"] == "bwa") else results_prefix / "{YSEQID}_minimap2_{REF}.bam" #elif (config["MAPPER"] == "minimap2") results_prefix / "{YSEQID}_minimap2_{REF}.bam"
     output:
-        SORTED_BAM = "results/{YSEQID}_bwa_mem_{REF}_sorted.bam",
-        BAI = "results/{YSEQID}_bwa_mem_{REF}_sorted.bam.bai",
-        IDXSTATS = "results/{YSEQID}_bwa_mem_{REF}_sorted.bam.idxstats.tsv"
+        SORTED_BAM = results_prefix / "{YSEQID}_bwa_mem_{REF}_sorted.bam",
+        BAI = results_prefix / "{YSEQID}_bwa_mem_{REF}_sorted.bam.bai",
+        IDXSTATS = results_prefix / "{YSEQID}_bwa_mem_{REF}_sorted.bam.idxstats.tsv"
+    conda:
+        env_path / "bam_process.yaml"
     params:
         #how do I pass the snakemake num threads to the tool?
         #NUM_THREADS = "-@ 4",
@@ -55,17 +99,19 @@ rule sort_and_index:
 	    samtools index -@ {threads} {output.SORTED_BAM}
 	    samtools idxstats {output.SORTED_BAM} > {output.IDXSTATS}
         """
+
 #swap the code with bamstaistics or sth. like that
 rule get_mapping_statistics:
     input:
-        BAM = "results/{YSEQID}_bwa_mem_{REF}_sorted.bam",
-        IDXSTATS =  "results/{YSEQID}_bwa_mem_{REF}_sorted.bam.idxstats.tsv"
+        BAM = results_prefix / "{YSEQID}_bwa_mem_{REF}_sorted.bam",
+        IDXSTATS =  results_prefix / "{YSEQID}_bwa_mem_{REF}_sorted.bam.idxstats.tsv"
 
     output:
-        STATS = "results/{YSEQID}_{REF}_mapping_stats.txt"
+        STATS = results_prefix / "{YSEQID}_{REF}_mapping_stats.txt"
     threads: 
         workflow.cores * 1
     shell:
         """
         bamstats -u -i {input.BAM} -o {output.STATS}
         """
+        

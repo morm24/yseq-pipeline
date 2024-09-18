@@ -18,10 +18,12 @@ rule download_snps:
 
 rule get_all_SNPs_Sample:
     input:
-        SORTED_BAM =    "results/{YSEQID}_bwa_mem_{REF}_sorted.bam",
+        SORTED_BAM =    results_prefix / "{YSEQID}_bwa_mem_{REF}_sorted.bam",
         REFSEQ =        "resources/refseq/{REF}/{REF}.fa"
     output:
-        RAW_VCF =       temp("results/chrY_raw_{YSEQID}_{REF}.vcf.gz")
+        RAW_VCF =       temp(results_prefix / "chrY_raw_{YSEQID}_{REF}.vcf.gz")
+    conda:
+        env_path / "extract_snps.yaml"
     threads:
         workflow.cores * 1
     shell:
@@ -35,9 +37,11 @@ rule merge_SNPS_HARRY_ALIEN_SAMPLE:
     input:
         SNPS =          "resources/tmp/snps_{REF}.vcf.gz",
         SNPS_TBI =      "resources/tmp/snps_{REF}.vcf.gz.tbi",
-        RAW_VCF =       "results/chrY_raw_{YSEQID}_{REF}.vcf.gz"
+        RAW_VCF =       results_prefix / "chrY_raw_{YSEQID}_{REF}.vcf.gz"
     output:
-        MERGED_VCF =    temp("results/chrY_merged_{YSEQID}_{REF}.vcf.gz")
+        MERGED_VCF =    temp(results_prefix / "chrY_merged_{YSEQID}_{REF}.vcf.gz")
+    conda:
+        env_path / "extract_snps.yaml"
     shell:
         """
         bcftools merge -m both -O z {input.SNPS} {input.RAW_VCF} > {output.MERGED_VCF}
@@ -46,9 +50,11 @@ rule merge_SNPS_HARRY_ALIEN_SAMPLE:
 
 rule get_differences_HARRY_ALIEN_SAMPLE:
     input:
-        MERGED_VCF =    "results/chrY_merged_{YSEQID}_{REF}.vcf.gz"
+        MERGED_VCF =    results_prefix / "chrY_merged_{YSEQID}_{REF}.vcf.gz"
     output:
-        CALLED_VCF =    temp("results/chrY_called_{YSEQID}_{REF}.vcf.gz")
+        CALLED_VCF =    temp(results_prefix / "chrY_called_{YSEQID}_{REF}.vcf.gz")
+    conda:
+        env_path / "extract_snps.yaml"
     shell:
         """
 	    bcftools call -O z -m -P 0 {input.MERGED_VCF} > {output.CALLED_VCF} 
@@ -57,9 +63,11 @@ rule get_differences_HARRY_ALIEN_SAMPLE:
 
 rule rm_HARRY_ALIEN_from_VCF:
     input:
-        CALLED_VCF =    "results/chrY_called_{YSEQID}_{REF}.vcf.gz"
+        CALLED_VCF =    results_prefix / "chrY_called_{YSEQID}_{REF}.vcf.gz"
     output:
-        CLEANED_VCF =   temp("results/chrY_cleaned_{YSEQID}_{REF}.vcf.gz")
+        CLEANED_VCF =   temp(results_prefix / "chrY_cleaned_{YSEQID}_{REF}.vcf.gz")
+    conda:
+        env_path / "extract_snps.yaml"
     shell:
         """
 	    bcftools view -O z -k -s ^HARRY,ALIEN {input.CALLED_VCF} > {output.CLEANED_VCF}
@@ -68,9 +76,11 @@ rule rm_HARRY_ALIEN_from_VCF:
 
 rule extract_ancestral_SNPS:
     input:
-        CLEANED_VCF =   "results/chrY_cleaned_{YSEQID}_{REF}.vcf.gz"
+        CLEANED_VCF =   results_prefix / "chrY_cleaned_{YSEQID}_{REF}.vcf.gz"
     output:
-        DERIVED_VCF =   "results/chrY_derived_{YSEQID}_{REF}.vcf.gz"
+        DERIVED_VCF =   results_prefix / "chrY_derived_{YSEQID}_{REF}.vcf.gz"
+    conda:
+        env_path / "extract_snps.yaml"
     threads:
         workflow.cores * 0.5
     shell:
@@ -81,9 +91,11 @@ rule extract_ancestral_SNPS:
 
 rule extract_derived_SNPS:
     input:
-        CLEANED_VCF =   "results/chrY_cleaned_{YSEQID}_{REF}.vcf.gz"
+        CLEANED_VCF =   results_prefix / "chrY_cleaned_{YSEQID}_{REF}.vcf.gz"
     output:
-        ANCESTRAL_VCF = "results/chrY_ancestral_{YSEQID}_{REF}.vcf.gz"
+        ANCESTRAL_VCF = results_prefix / "chrY_ancestral_{YSEQID}_{REF}.vcf.gz"
+    conda:
+        env_path / "extract_snps.yaml"
     threads:
         workflow.cores * 0.5
     shell:
@@ -94,10 +106,12 @@ rule extract_derived_SNPS:
 
 rule get_novel_SNPS:
     input:
-        CALLED_VCF =    "results/chrY_called_{YSEQID}_{REF}.vcf.gz",
+        CALLED_VCF =    results_prefix / "chrY_called_{YSEQID}_{REF}.vcf.gz",
     output:
-        NOVEL_VCF =     temp("results/chrY_novel_SNPs_{YSEQID}_{REF}.gz"),
-        NOVEL_VCF_TSV =     "results/chrY_novel_SNPs_{YSEQID}_{REF}.vcf.tsv"
+        NOVEL_VCF =     temp(results_prefix / "chrY_novel_SNPs_{YSEQID}_{REF}.gz"),
+        NOVEL_VCF_TSV =     results_prefix / "chrY_novel_SNPs_{YSEQID}_{REF}.vcf.tsv"
+    conda:
+        env_path / "extract_snps.yaml"
     shell:
         """
         bcftools filter -i 'TYPE="snp" && QUAL>=30 && GT=="1/1" && DP4[2] + DP4[3] >=2 && (DP4[0] + DP4[1]) / DP < 0.1' {input.CALLED_VCF} | bcftools view -n -O z -s ^HARRY,ALIEN > {output.NOVEL_VCF}
@@ -106,21 +120,25 @@ rule get_novel_SNPS:
         """
 rule identity_resolution:
     input:
-        NOVEL_VCF_TSV =     "results/chrY_novel_SNPs_{YSEQID}_{REF}.vcf.tsv",
+        NOVEL_VCF_TSV =     results_prefix / "chrY_novel_SNPs_{YSEQID}_{REF}.vcf.tsv",
         REFSEQ =        "resources/refseq/{REF}/{REF}.fa"
     output:
-        NOVEL_TSV =     "results/chrY_novel_SNPs_{YSEQID}_{REF}.tsv"
+        NOVEL_TSV =     results_prefix / "chrY_novel_SNPs_{YSEQID}_{REF}.tsv"
+    conda:
+        env_path / "extract_snps.yaml"
     shell:
         """
         python3 workflow/scripts/script_templates/identityResolutionTemplateCreator.py -batch {input.NOVEL_VCF_TSV} {output.NOVEL_TSV} {input.REFSEQ}
         """
 rule indel_calling:
     input:
-        CALLED_VCF =    "results/chrY_called_{YSEQID}_{REF}.vcf.gz"
+        CALLED_VCF =    results_prefix / "chrY_called_{YSEQID}_{REF}.vcf.gz"
     output:
-        INDEL_VCF =     "results/chrY_INDELs_{YSEQID}_{REF}.gz"
+        INDEL_VCF =     results_prefix / "chrY_INDELs_{YSEQID}_{REF}.gz"
+    conda:
+        env_path / "extract_snps.yaml"
     shell:
         """
         bcftools filter -i 'TYPE="indel" && QUAL>=30 && GT=="1/1" && DP4[2] + DP4[3] >=2 && (DP4[0] + DP4[1]) / DP < 0.1' {input.CALLED_VCF} | bcftools view -n -O z -s ^HARRY,ALIEN > {output.INDEL_VCF}
-         tabix {output.INDEL_VCF}
+        tabix {output.INDEL_VCF}
         """

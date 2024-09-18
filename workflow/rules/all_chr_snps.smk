@@ -3,7 +3,7 @@ for chr in ["chr1","chr2","chr3","chr4","chr5","chr6","chr7","chr8","chr9","chr1
         name: 
             f"call_all_snps_{chr}"
         input: 
-            SORTED_BAM =    "results/{YSEQID}_bwa_mem_{REF}_sorted.bam",
+            SORTED_BAM =    results_prefix / "{YSEQID}_bwa_mem_{REF}_sorted.bam",
             REFSEQ =        "resources/refseq/{REF}/{REF}.fa"
         output: 
             VCF =           temp(f"resources/tmp/{chr}_{{YSEQID}}_{{REF}}.vcf.gz")
@@ -37,9 +37,9 @@ rule combine_chr_snps:
         CHRX_VCF =     "resources/tmp/chrX_{YSEQID}_{REF}.vcf.gz",
         CHRY_VCF =     "resources/tmp/chrY_{YSEQID}_{REF}.vcf.gz"
     output:
-        ALL_CHR_SNPS = "results/all_chr_snps_{YSEQID}_{REF}.vcf.gz"
+        ALL_CHR_SNPS = results_prefix / "all_chr_snps_{YSEQID}_{REF}.vcf.gz"
     shell:
         """
-        bcftools concat -O z resources/tmp/chr[1-9]_{wildcards.YSEQID}_{wildcards.REF}.gz resources/tmp/chr[1-2][0-9]_{wildcards.YSEQID}_{wildcards.REF}.gz resources/tmp/chr[M,X-Y]_{wildcards.YSEQID}_{wildcards.REF}.gz > {output.ALL_CHR_SNPS}
+        bcftools concat -O z resources/tmp/chr[1-9]_{wildcards.YSEQID}_{wildcards.REF}.vcf.gz resources/tmp/chr[1-2][0-9]_{wildcards.YSEQID}_{wildcards.REF}.vcf.gz resources/tmp/chr[M,X-Y]_{wildcards.YSEQID}_{wildcards.REF}.vcf.gz > {output.ALL_CHR_SNPS}
 	    tabix {output.ALL_CHR_SNPS}
         """

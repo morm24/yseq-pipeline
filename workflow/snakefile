@@ -6,6 +6,7 @@ from pathlib import Path
 configfile: "./config/config.yaml"
 #outdir_prefix = Path(config["OUTDIR"]) / {REF} / 
 
+
 samples_df = pd.DataFrame(pd.read_csv("./config/samples.csv"))
 yseqids = samples_df["YSEQID"].to_list()
 refs = samples_df["REF"].to_list()  # Fill missing values with 'hg38'   #.fillna("hg38")
@@ -13,27 +14,38 @@ refs = samples_df["REF"].to_list()  # Fill missing values with 'hg38'   #.fillna
 # Create a list of tuples for wildcards
 wildcards = [(yseqid, ref) for yseqid, ref in zip(yseqids, refs)]
 
+# global variables for path prefixes:
+# results:
+results_prefix = Path(config["results_refseq"]) / "{REF}"
+# resources:
+resources_prefix = Path("./resources/refseq/")
+log_prefix = resources_prefix / "logs"
+env_path = Path(config["ENV_PATH"]).resolve()
+
+sample_prefix = Path(config["SAMPLE_PATH"]).resolve()
+
 
 rule all:
     input:
-        expand("results/tview_{YSEQID}_{REF}.sh",               zip, YSEQID=yseqids, REF=refs), # pick row-wise 
-        expand("results/{YSEQID}_bwa-mem_{REF}_chrY.bam",       zip, YSEQID=yseqids, REF=refs),
-        expand("results/{YSEQID}_bwa-mem_{REF}_rCRS_chrM.bam",  zip, YSEQID=yseqids, REF=refs),
-        #expand("results/{YSEQID}_bwa_mem_{REF}_sorted.bam",     zip, YSEQID=yseqids, REF=refs),
-        #expand("results/{YSEQID}_{REF}_mtDNA.fasta",            zip, YSEQID=yseqids, REF=refs),
-        expand("results/{YSEQID}_{REF}_mapping_stats.txt",      zip, YSEQID=yseqids, REF=refs),
-        #expand("results/{YSEQID}_{REF}_positives.txt",         zip, YSEQID=yseqids, REF=refs),
-        #expand("results/{YSEQID}_{REF}_negatives.txt",         zip, YSEQID=yseqids, REF=refs),
-        #expand("results/{YSEQID}_{REF}haploData.txt",           zip, YSEQID=yseqids, REF=refs),
-        expand("results/{YSEQID}_{REF}_MTDNA_SNPS.tsv",         zip, YSEQID=yseqids, REF=refs),
-        expand("results/chrY_INDELs_{YSEQID}_{REF}.gz",         zip, YSEQID=yseqids, REF=refs),
-        expand("results/{YSEQID}_{REF}_PHYLOEQ_SNPS.tsv",       zip, YSEQID=yseqids, REF=refs),
-        expand("results/{YSEQID}_{REF}_DOWNSTR_SNPS.tsv",       zip, YSEQID=yseqids, REF=refs),
-        #expand("results/{YSEQID}_{REF}_result_summary.txt",     zip, YSEQID=yseqids, REF=refs),
-        expand("results/all_chr_snps_{YSEQID}_{REF}.vcf.gz",    zip, YSEQID=yseqids, REF=refs),
-        #expand("results/{YSEQID}_{REF}_update.sh",              zip, YSEQID=yseqids, REF=refs),
-        expand("results/chrY_novel_SNPs_{YSEQID}_{REF}.tsv",    zip, YSEQID=yseqids, REF=refs),
-        expand("results/{YSEQID}_{REF}_addAlleles.tsv",         zip, YSEQID=yseqids, REF=refs)
+        expand(results_prefix / "tview_{YSEQID}_{REF}.sh",               zip, YSEQID=yseqids, REF=refs), # pick row-wise 
+        expand(results_prefix / "{YSEQID}_bwa-mem_{REF}_chrY.bam",       zip, YSEQID=yseqids, REF=refs),
+        expand(results_prefix / "{YSEQID}_bwa-mem_{REF}_rCRS_chrM.bam",  zip, YSEQID=yseqids, REF=refs),
+        #expand(results_prefix / "{YSEQID}_bwa_mem_{REF}_sorted.bam",     zip, YSEQID=yseqids, REF=refs),
+        #expand(results_prefix / "{YSEQID}_{REF}_mtDNA.fasta",            zip, YSEQID=yseqids, REF=refs),
+        expand(results_prefix / "{YSEQID}_{REF}_mapping_stats.txt",      zip, YSEQID=yseqids, REF=refs),
+        #expand(results_prefix / "{YSEQID}_{REF}_positives.txt",         zip, YSEQID=yseqids, REF=refs),
+        #expand(results_prefix / "{YSEQID}_{REF}_negatives.txt",         zip, YSEQID=yseqids, REF=refs),
+        #expand(results_prefix / "{YSEQID}_{REF}haploData.txt",           zip, YSEQID=yseqids, REF=refs),
+        expand(results_prefix / "{YSEQID}_{REF}_MTDNA_SNPS.tsv",         zip, YSEQID=yseqids, REF=refs),
+        expand(results_prefix / "chrY_INDELs_{YSEQID}_{REF}.gz",         zip, YSEQID=yseqids, REF=refs),
+        expand(results_prefix / "{YSEQID}_{REF}_PHYLOEQ_SNPS.tsv",       zip, YSEQID=yseqids, REF=refs),
+        expand(results_prefix / "{YSEQID}_{REF}_DOWNSTR_SNPS.tsv",       zip, YSEQID=yseqids, REF=refs),
+        #expand(results_prefix / "{YSEQID}_{REF}_result_summary.txt",     zip, YSEQID=yseqids, REF=refs),
+        expand(results_prefix / "all_chr_snps_{YSEQID}_{REF}.vcf.gz",    zip, YSEQID=yseqids, REF=refs),
+        #expand(results_prefix / "{YSEQID}_{REF}_update.sh",              zip, YSEQID=yseqids, REF=refs),
+        expand(results_prefix / "chrY_novel_SNPs_{YSEQID}_{REF}.tsv",    zip, YSEQID=yseqids, REF=refs),
+        expand(results_prefix / "{YSEQID}_{REF}_addAlleles.tsv",         zip, YSEQID=yseqids, REF=refs)
+        #expand("addAlleles.tsv",         zip, YSEQID=yseqids, REF=refs)
 
 
 
@@ -59,3 +71,4 @@ include: "rules/all_chr_snps_onerule.smk"
 
 
 #snakemake -c 32 -id 63819 -ref hg38
+#snakemake --touch

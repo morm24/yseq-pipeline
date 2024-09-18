@@ -1,0 +1,8 @@
+name: bam_process
+channels:
+  - conda-forge
+  - bioconda  
+dependencies:
+  -samtools
+  -bcftools
+  -tabix
