@@ -6,3 +6,9 @@ rule 2 just as input, rule 3 uses them again as in and output.
 
 
 how can I define a rule, that is just needed, when a certain wildcard has a certain Vlue (download snps only when {REF} is hg38)
+
+
+
+
+all mtDNA scripts shouldnt run, when ref = HS1
+
