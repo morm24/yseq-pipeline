@@ -1,3 +1,4 @@
+.gitignore
 #reference
 resources/refseq/**/*.fa*
 !resources/refseq/hg38.fa
