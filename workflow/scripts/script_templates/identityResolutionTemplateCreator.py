@@ -160,6 +160,7 @@ def lineProcessing(line, w, referenceFile, refIndexFile, refseq, output, passing
     infoSplit = info.split(";")
     cov = 0
 
+    #calculate coverage at the snp position
     for dp4 in infoSplit:
         if (dp4.find("DP4") +1):     #if found: value > 0 == true. if not found: -1+1=0 == false
             dp4 = dp4.replace("DP4=","")

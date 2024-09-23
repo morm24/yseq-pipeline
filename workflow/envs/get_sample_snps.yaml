@@ -1,10 +1,10 @@
-name: bam_process
+name: get_sample_snps
 channels:
   - conda-forge
   - bioconda
   - defaults
 dependencies:
   - bcftools=1.21
-  - bzip2=1.0.8
-  - samtools=1.21
+  - gzip=1.13
   - tabix=1.11
+  - wget=1.21.4

@@ -85,7 +85,7 @@ rule sort_and_index:
         BAI = results_prefix / "{YSEQID}_bwa_mem_{REF}_sorted.bam.bai",
         IDXSTATS = results_prefix / "{YSEQID}_bwa_mem_{REF}_sorted.bam.idxstats.tsv"
     conda:
-        env_path / "bam_process.yaml"
+        env_path / "mapping.yaml"
     params:
         #how do I pass the snakemake num threads to the tool?
         #NUM_THREADS = "-@ 4",
@@ -108,6 +108,8 @@ rule get_mapping_statistics:
 
     output:
         STATS = results_prefix / "{YSEQID}_{REF}_mapping_stats.txt"
+    conda:
+        env_path / "mapping.yaml"
     threads: 
         workflow.cores * 1
     shell:

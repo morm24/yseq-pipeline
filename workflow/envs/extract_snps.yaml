@@ -1,8 +1,0 @@
-name: extract_snps
-channels:
-  - conda-forge
-  - bioconda
-dependencies:
-  - bcftools~1.18
-  - tabix~1.8
-  - gzip~1.12

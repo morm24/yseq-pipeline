@@ -3,6 +3,8 @@ rule seperate_yBAM:
         BAM = results_prefix / "{YSEQID}_bwa_mem_{REF}_sorted.bam"
     output:
         YBAM = results_prefix / "{YSEQID}_bwa-mem_{REF}_chrY.bam"
+    conda:
+        env_path / "bam_process.yaml"
     threads: 
         workflow.cores * 1
     shell:
@@ -15,6 +17,8 @@ rule seperate_mtBAM:
         SORTED_BAM =    results_prefix / "{YSEQID}_bwa_mem_{REF}_sorted.bam"    
     output:
         MTBAM = results_prefix / "{YSEQID}_bwa-mem_{REF}_rCRS_chrM.bam"
+    conda:
+        env_path / "bam_process.yaml"
     threads: 
         workflow.cores * 1
     shell:

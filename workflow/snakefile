@@ -21,6 +21,7 @@ results_prefix = Path(config["results_refseq"]) / "{REF}"
 resources_prefix = Path("./resources/refseq/")
 log_prefix = resources_prefix / "logs"
 env_path = Path(config["ENV_PATH"]).resolve()
+tmp_prefix =  Path(config["TMP_PATH"]).resolve()
 
 sample_prefix = Path(config["SAMPLE_PATH"]).resolve()
 
@@ -50,7 +51,7 @@ rule all:
 
 
 wildcard_constraints:
-    REF = "hg38|hg19|hs1",
+    REF = "hg38|hs1",
     YSEQID = r"\d{1,6}"
 
 ##### target rules #####
@@ -68,7 +69,16 @@ include: "rules/all_chr_snps_onerule.smk"
 
 
 
+#current snakemake calls: 
+
+#snakemake -c 32
+#snakemake -npc 32
+#snakemake -npc 32 --dag
+#snakemake --forceall
+#snakemake -c32 > snakemake.log 2>&1
 
 
 #snakemake -c 32 -id 63819 -ref hg38
+
+
 #snakemake --touch

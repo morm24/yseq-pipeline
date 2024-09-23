@@ -3,6 +3,8 @@ rule preprocessing_cladefinder_derived:
         DERIVED_VCF =   results_prefix / "chrY_derived_{YSEQID}_{REF}.vcf.gz",
     output:
         POSITIVE_TXT =  results_prefix / "{YSEQID}_{REF}_positives.txt",
+    conda:
+        env_path / "bam_process.yaml"
     shell:
         """
 	    bcftools query -f '%ID,' {input.DERIVED_VCF} | sed ':a;N;$!ba;s/\\n//g' > {output.POSITIVE_TXT} &
@@ -13,6 +15,8 @@ rule preprocessing_cladefinder_ancestral:
         ANCESTRAL_VCF = results_prefix / "chrY_ancestral_{YSEQID}_{REF}.vcf.gz"
     output:
         NEGATIVE_TXT =  results_prefix / "{YSEQID}_{REF}_negatives.txt"
+    conda:
+        env_path / "bam_process.yaml"
     shell:
         """
 	    bcftools query -f '%ID,' {input.ANCESTRAL_VCF} | sed ':a;N;$!ba;s/\\n//g' > {output.NEGATIVE_TXT} 
@@ -25,6 +29,8 @@ rule check_HG:
         YFULLTREE =     "resources/tree/latest_YFull_YTree.json"
     output:
         temp(results_prefix / "{YSEQID}_{REF}cladeFinderOutput.csv"),
+    conda:
+        env_path / "bam_process.yaml"
         
     shell:
         """
@@ -76,6 +82,8 @@ rule get_equivalent_and_downstream_SNPS:
     output:
         PHYLOEQ_SNPS = results_prefix / "{YSEQID}_{REF}_PHYLOEQ_SNPS.tsv",
         DOWNSTR_SNPS = results_prefix / "{YSEQID}_{REF}_DOWNSTR_SNPS.tsv"
+    conda:
+        env_path / "bam_process.yaml"
     shell:
         """
         YFULLHG=$(head -n 1 {input.HAPLO_GROUP})

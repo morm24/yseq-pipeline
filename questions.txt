@@ -12,3 +12,7 @@ how can I define a rule, that is just needed, when a certain wildcard has a cert
 
 all mtDNA scripts shouldnt run, when ref = HS1
 
+The main goal of this script is to change the stnadard mapping script from hg38 to HS1. 
+
+How is the bachelor thesis evaluated? 
+Is only the report evaluated, or does the code/Snakemake pipeline also play a (significant) role in the evaluation?

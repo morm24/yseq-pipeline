@@ -1,32 +1,34 @@
-rule get_all_chr_snps:
+rule call_all_chr_snps:
     input:
         SORTED_BAM =    results_prefix / "{YSEQID}_bwa_mem_{REF}_sorted.bam",
         REFSEQ =        "resources/refseq/{REF}/{REF}.fa"
     output:
-        CHR1_VCF =     temp("resources/tmp/chr1_{YSEQID}_{REF}.vcf.gz"),
-        CHR2_VCF =     temp("resources/tmp/chr2_{YSEQID}_{REF}.vcf.gz"),
-        CHR3_VCF =     temp("resources/tmp/chr3_{YSEQID}_{REF}.vcf.gz"),
-        CHR4_VCF =     temp("resources/tmp/chr4_{YSEQID}_{REF}.vcf.gz"),
-        CHR5_VCF =     temp("resources/tmp/chr5_{YSEQID}_{REF}.vcf.gz"),
-        CHR6_VCF =     temp("resources/tmp/chr6_{YSEQID}_{REF}.vcf.gz"),
-        CHR7_VCF =     temp("resources/tmp/chr7_{YSEQID}_{REF}.vcf.gz"),
-        CHR8_VCF =     temp("resources/tmp/chr8_{YSEQID}_{REF}.vcf.gz"),
-        CHR9_VCF =     temp("resources/tmp/chr9_{YSEQID}_{REF}.vcf.gz"),
-        CHR10_VCF =     temp("resources/tmp/chr10_{YSEQID}_{REF}.vcf.gz"),
-        CHR11_VCF =     temp("resources/tmp/chr11_{YSEQID}_{REF}.vcf.gz"),
-        CHR12_VCF =     temp("resources/tmp/chr12_{YSEQID}_{REF}.vcf.gz"),
-        CHR13_VCF =     temp("resources/tmp/chr13_{YSEQID}_{REF}.vcf.gz"),
-        CHR14_VCF =     temp("resources/tmp/chr14_{YSEQID}_{REF}.vcf.gz"),
-        CHR15_VCF =     temp("resources/tmp/chr15_{YSEQID}_{REF}.vcf.gz"),
-        CHR16_VCF =     temp("resources/tmp/chr16_{YSEQID}_{REF}.vcf.gz"),
-        CHR17_VCF =     temp("resources/tmp/chr17_{YSEQID}_{REF}.vcf.gz"),
-        CHR18_VCF =     temp("resources/tmp/chr18_{YSEQID}_{REF}.vcf.gz"),
-        CHR19_VCF =     temp("resources/tmp/chr19_{YSEQID}_{REF}.vcf.gz"),
-        CHR20_VCF =     temp("resources/tmp/chr20_{YSEQID}_{REF}.vcf.gz"),
-        CHR21_VCF =     temp("resources/tmp/chr21_{YSEQID}_{REF}.vcf.gz"),
-        CHR22_VCF =     temp("resources/tmp/chr22_{YSEQID}_{REF}.vcf.gz"),
-        CHRX_VCF =     temp("resources/tmp/chrX_{YSEQID}_{REF}.vcf.gz"),
-        CHRY_VCF =     temp("resources/tmp/chrY_{YSEQID}_{REF}.vcf.gz")
+        CHR1_VCF =     temp(tmp_prefix / "chr1_{YSEQID}_{REF}.vcf.gz"),
+        CHR2_VCF =     temp(tmp_prefix / "chr2_{YSEQID}_{REF}.vcf.gz"),
+        CHR3_VCF =     temp(tmp_prefix / "chr3_{YSEQID}_{REF}.vcf.gz"),
+        CHR4_VCF =     temp(tmp_prefix / "chr4_{YSEQID}_{REF}.vcf.gz"),
+        CHR5_VCF =     temp(tmp_prefix / "chr5_{YSEQID}_{REF}.vcf.gz"),
+        CHR6_VCF =     temp(tmp_prefix / "chr6_{YSEQID}_{REF}.vcf.gz"),
+        CHR7_VCF =     temp(tmp_prefix / "chr7_{YSEQID}_{REF}.vcf.gz"),
+        CHR8_VCF =     temp(tmp_prefix / "chr8_{YSEQID}_{REF}.vcf.gz"),
+        CHR9_VCF =     temp(tmp_prefix / "chr9_{YSEQID}_{REF}.vcf.gz"),
+        CHR10_VCF =     temp(tmp_prefix / "chr10_{YSEQID}_{REF}.vcf.gz"),
+        CHR11_VCF =     temp(tmp_prefix / "chr11_{YSEQID}_{REF}.vcf.gz"),
+        CHR12_VCF =     temp(tmp_prefix / "chr12_{YSEQID}_{REF}.vcf.gz"),
+        CHR13_VCF =     temp(tmp_prefix / "chr13_{YSEQID}_{REF}.vcf.gz"),
+        CHR14_VCF =     temp(tmp_prefix / "chr14_{YSEQID}_{REF}.vcf.gz"),
+        CHR15_VCF =     temp(tmp_prefix / "chr15_{YSEQID}_{REF}.vcf.gz"),
+        CHR16_VCF =     temp(tmp_prefix / "chr16_{YSEQID}_{REF}.vcf.gz"),
+        CHR17_VCF =     temp(tmp_prefix / "chr17_{YSEQID}_{REF}.vcf.gz"),
+        CHR18_VCF =     temp(tmp_prefix / "chr18_{YSEQID}_{REF}.vcf.gz"),
+        CHR19_VCF =     temp(tmp_prefix / "chr19_{YSEQID}_{REF}.vcf.gz"),
+        CHR20_VCF =     temp(tmp_prefix / "chr20_{YSEQID}_{REF}.vcf.gz"),
+        CHR21_VCF =     temp(tmp_prefix / "chr21_{YSEQID}_{REF}.vcf.gz"),
+        CHR22_VCF =     temp(tmp_prefix / "chr22_{YSEQID}_{REF}.vcf.gz"),
+        CHRX_VCF =     temp(tmp_prefix / "chrX_{YSEQID}_{REF}.vcf.gz"),
+        CHRY_VCF =     temp(tmp_prefix / "chrY_{YSEQID}_{REF}.vcf.gz")
+    conda:
+        env_path / "bam_process.yaml"
     threads: 
         workflow.cores * 1
     shell:
@@ -60,32 +62,34 @@ rule get_all_chr_snps:
 
 rule combine_chr_snps:
     input:
-        CHR1_VCF =     "resources/tmp/chr1_{YSEQID}_{REF}.vcf.gz",
-        CHR2_VCF =     "resources/tmp/chr2_{YSEQID}_{REF}.vcf.gz",
-        CHR3_VCF =     "resources/tmp/chr3_{YSEQID}_{REF}.vcf.gz",
-        CHR4_VCF =     "resources/tmp/chr4_{YSEQID}_{REF}.vcf.gz",
-        CHR5_VCF =     "resources/tmp/chr5_{YSEQID}_{REF}.vcf.gz",
-        CHR6_VCF =     "resources/tmp/chr6_{YSEQID}_{REF}.vcf.gz",
-        CHR7_VCF =     "resources/tmp/chr7_{YSEQID}_{REF}.vcf.gz",
-        CHR8_VCF =     "resources/tmp/chr8_{YSEQID}_{REF}.vcf.gz",
-        CHR9_VCF =     "resources/tmp/chr9_{YSEQID}_{REF}.vcf.gz",
-        CHR10_VCF =     "resources/tmp/chr10_{YSEQID}_{REF}.vcf.gz",
-        CHR11_VCF =     "resources/tmp/chr11_{YSEQID}_{REF}.vcf.gz",
-        CHR12_VCF =     "resources/tmp/chr12_{YSEQID}_{REF}.vcf.gz",
-        CHR13_VCF =     "resources/tmp/chr13_{YSEQID}_{REF}.vcf.gz",
-        CHR14_VCF =     "resources/tmp/chr14_{YSEQID}_{REF}.vcf.gz",
-        CHR15_VCF =     "resources/tmp/chr15_{YSEQID}_{REF}.vcf.gz",
-        CHR16_VCF =     "resources/tmp/chr16_{YSEQID}_{REF}.vcf.gz",
-        CHR17_VCF =     "resources/tmp/chr17_{YSEQID}_{REF}.vcf.gz",
-        CHR18_VCF =     "resources/tmp/chr18_{YSEQID}_{REF}.vcf.gz",
-        CHR19_VCF =     "resources/tmp/chr19_{YSEQID}_{REF}.vcf.gz",
-        CHR20_VCF =     "resources/tmp/chr20_{YSEQID}_{REF}.vcf.gz",
-        CHR21_VCF =     "resources/tmp/chr21_{YSEQID}_{REF}.vcf.gz",
-        CHR22_VCF =     "resources/tmp/chr22_{YSEQID}_{REF}.vcf.gz",
-        CHRX_VCF =     "resources/tmp/chrX_{YSEQID}_{REF}.vcf.gz",
-        CHRY_VCF =     "resources/tmp/chrY_{YSEQID}_{REF}.vcf.gz"
+        CHR1_VCF =     tmp_prefix / "chr1_{YSEQID}_{REF}.vcf.gz",
+        CHR2_VCF =     tmp_prefix / "chr2_{YSEQID}_{REF}.vcf.gz",
+        CHR3_VCF =     tmp_prefix / "chr3_{YSEQID}_{REF}.vcf.gz",
+        CHR4_VCF =     tmp_prefix / "chr4_{YSEQID}_{REF}.vcf.gz",
+        CHR5_VCF =     tmp_prefix / "chr5_{YSEQID}_{REF}.vcf.gz",
+        CHR6_VCF =     tmp_prefix / "chr6_{YSEQID}_{REF}.vcf.gz",
+        CHR7_VCF =     tmp_prefix / "chr7_{YSEQID}_{REF}.vcf.gz",
+        CHR8_VCF =     tmp_prefix / "chr8_{YSEQID}_{REF}.vcf.gz",
+        CHR9_VCF =     tmp_prefix / "chr9_{YSEQID}_{REF}.vcf.gz",
+        CHR10_VCF =     tmp_prefix / "chr10_{YSEQID}_{REF}.vcf.gz",
+        CHR11_VCF =     tmp_prefix / "chr11_{YSEQID}_{REF}.vcf.gz",
+        CHR12_VCF =     tmp_prefix / "chr12_{YSEQID}_{REF}.vcf.gz",
+        CHR13_VCF =     tmp_prefix / "chr13_{YSEQID}_{REF}.vcf.gz",
+        CHR14_VCF =     tmp_prefix / "chr14_{YSEQID}_{REF}.vcf.gz",
+        CHR15_VCF =     tmp_prefix / "chr15_{YSEQID}_{REF}.vcf.gz",
+        CHR16_VCF =     tmp_prefix / "chr16_{YSEQID}_{REF}.vcf.gz",
+        CHR17_VCF =     tmp_prefix / "chr17_{YSEQID}_{REF}.vcf.gz",
+        CHR18_VCF =     tmp_prefix / "chr18_{YSEQID}_{REF}.vcf.gz",
+        CHR19_VCF =     tmp_prefix / "chr19_{YSEQID}_{REF}.vcf.gz",
+        CHR20_VCF =     tmp_prefix / "chr20_{YSEQID}_{REF}.vcf.gz",
+        CHR21_VCF =     tmp_prefix / "chr21_{YSEQID}_{REF}.vcf.gz",
+        CHR22_VCF =     tmp_prefix / "chr22_{YSEQID}_{REF}.vcf.gz",
+        CHRX_VCF =     tmp_prefix / "chrX_{YSEQID}_{REF}.vcf.gz",
+        CHRY_VCF =     tmp_prefix / "chrY_{YSEQID}_{REF}.vcf.gz"
     output:
         ALL_CHR_SNPS = results_prefix / "all_chr_snps_{YSEQID}_{REF}.vcf.gz"
+    conda:
+        env_path / "bam_process.yaml"
     shell:
         """
         bcftools concat -O z resources/tmp/chr[1-9]_{wildcards.YSEQID}_{wildcards.REF}.vcf.gz resources/tmp/chr[1-2][0-9]_{wildcards.YSEQID}_{wildcards.REF}.vcf.gz resources/tmp/chr[M,X-Y]_{wildcards.YSEQID}_{wildcards.REF}.vcf.gz > {output.ALL_CHR_SNPS}
