@@ -29,7 +29,7 @@ rule map_minimap2:
     threads: workflow.cores
     shell:
         """
-        bwa mem {params} {threads} {input.INDEX} {input.READS_1} {input.READS_2} | 
+        minimap2 {params} {threads} {input.INDEX} {input.READS_1} {input.READS_2} | 
         samtools view -@ {threads} -b -t {input.REFSEQ} -o {output.BAM} - 
         """
 
