@@ -25,31 +25,52 @@ The YSEQ Y-DNA Analysis Pipeline is designed to process paired ended fastq.gz fi
     cd yseq-pipeline
     ```
 
-2. **Install Python dependencies:**
+2. **Install Python:**
     ```sh
-    pip install -r requirements.txt
+    apt install python3
     ```
 
-3. **Ensure the right tools are installed:**
+3. **Install snakemake:**
     ```sh
-    sudo apt-get install bcftools  samtools python3 snakemake
+    apt install snakemake
     ```
 
 ## Usage
 1. **Prepare the input files:**
+    ### First Methode
+    #### Add your sample
+    Place your samples into the `resources/sample/{SampleID}` folder.
+    The Filename name has to be: `{SampleID}_R1.fastq.gz` if paried end, the second files name must be `{SampleID}_R2.fastq.gz` 
     
-    ### Add your sample
-    Place your samples into the `resources/sample` folder. 
-    They have to be Paired end `fastq.gz` files.
-    Their name has to be: `{SampleID}_R1.fastq.gz` and `{SampleID}_R2.fastq.gz` 
-    
-    ### Add the reference sequence
+    #### Add the reference sequence
     Place the chosen reference sequence into `resources/refseq/{ref}/{ref}.fa`.
     The Name of the foldername and the fasta seqence have to be the same.
 
-    ### add both to the samples.csv
-    Add all samples with their ID to th file `config/samples.csv`. 
-    write each sample into a line, separated with a comma.
+    #### add both to the samples.csv
+    Add all SampleIDs to the file `config/samples.csv`. 
+    Separated with a "," note the reference sequence, you want to map and analyze the sample to.
+    Example: 
+    ```
+    ID,REF
+    63819,hs1
+    ```
+    #### configurate the settings
+    Chose what type of reads you use, the mapping software and result directory in `config/config.yaml`
+
+    ### Second Methode
+    #### Add your resource folders
+    Open `config/config.yaml`.
+    Change the Sample, Reference and Results folders.
+    Chose the read type, and mapping software.
+    #### Add your sample
+    Add all SampleIDs to the file `config/samples.csv`. 
+    Separated with a "," note the reference sequence, you want to map and analyze the sample to.
+    Example: 
+    ```
+    ID,REF
+    63819,hs1
+    ```
+    #### configurate the settings
 
 
 
