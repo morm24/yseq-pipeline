@@ -200,7 +200,7 @@ def lineProcessing(line, w, referenceFile, refIndexFile, refseq, output, passing
 def analyzeNovelSNPs(vcfFile, outputFile, referenceFile):
     
     #calculate num_threads by max possible memory usage (8Gb usage per thread)
-    maxCores = psutil.virtual_memory().total // (1024 ** 3) // 8
+    maxCores = max(1 , psutil.virtual_memory().total // (1024 ** 3) // 8 )
     num_threads = os.cpu_count() if maxCores > os.cpu_count() else maxCores
 
     print("we are using " + str(num_threads) + " threads")
