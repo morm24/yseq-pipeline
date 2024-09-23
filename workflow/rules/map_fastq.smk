@@ -9,7 +9,7 @@ rule index_refseq_minimap2:
         env_path / "mapping.yaml"
     shell:
         """
-        minimap2 index {input.REFSEQ}
+        minimap2 {input.REFSEQ} -d {output.INDEX}
         """
 
 rule map_minimap2:
