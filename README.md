@@ -65,9 +65,18 @@ The YSEQ Y-DNA Analysis Pipeline is designed to process paired ended fastq.gz fi
 
 ## Reference Sequences
 Common reference sequences and their Download links are:
-- **hg38:** [Download hg38](https://hgdownload.soe.ucsc.edu/goldenPath/hg38/bigZips/hg38.fa.gz) ```sh wget https://hgdownload.soe.ucsc.edu/goldenPath/hg38/bigZips/hg38.fa.gz```
-- **hg19:** [Download hg19](https://hgdownload.soe.ucsc.edu/goldenPath/hg19/bigZips/hg19.fa.gz) ```sh wget https://hgdownload.soe.ucsc.edu/goldenPath/hg19/bigZips/hg19.fa.gz```
-- **hs1:**  [Download hs1](https://hgdownload.soe.ucsc.edu/goldenPath/hs1/bigZips/hs1.fa.gz) ```sh  https://hgdownload.soe.ucsc.edu/goldenPath/hs1/bigZips/hs1.fa.gz```
+- **hg38:** [Download hg38](https://hgdownload.soe.ucsc.edu/goldenPath/hg38/bigZips/hg38.fa.gz)     
+```sh 
+wget https://hgdownload.soe.ucsc.edu/goldenPath/hg38/bigZips/hg38.fa.gz
+```
+- **hg19:** [Download hg19](https://hgdownload.soe.ucsc.edu/goldenPath/hg19/bigZips/hg19.fa.gz)     
+```sh 
+wget https://hgdownload.soe.ucsc.edu/goldenPath/hg19/bigZips/hg19.fa.gz
+```
+- **hs1:**  [Download hs1](https://hgdownload.soe.ucsc.edu/goldenPath/hs1/bigZips/hs1.fa.gz)        
+```sh  
+wget https://hgdownload.soe.ucsc.edu/goldenPath/hs1/bigZips/hs1.fa.gz
+```
 
 ## YFull YTree Updates
 To download the latest YFull YTree updates, follow these steps:

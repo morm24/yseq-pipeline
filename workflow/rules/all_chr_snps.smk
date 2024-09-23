@@ -8,9 +8,9 @@ for chr in chromosomes:
             REFSEQ =        "resources/refseq/{REF}/{REF}.fa"
         output: 
             VCF =           temp(f"resources/tmp/{chr}_{{YSEQID}}_{{REF}}.vcf.gz")
-    conda:
-        env_path / "bam_process.yaml"
-    threads: 4
+        conda:
+            env_path / "bam_process.yaml"
+        threads: 4
         shell: f"bcftools mpileup -r {chr} -Ou -C 0 -f {{input.REFSEQ}} {{input.SORTED_BAM}} | bcftools call -O z --threads {{threads}} -v -V indels -m -P 0 > {{output.VCF}}"
 
 
@@ -19,7 +19,7 @@ for chr in chromosomes:
 
 rule combine_chr_snps:
     input:
-        expand(f"resources/tmp/{chr}_{{YSEQID}}_{{REF}}.vcf.gz", chr=chromosomes)
+        expand("resources/tmp/{chr}_{YSEQID}_{REF}.vcf.gz", chr=chromosomes)
     output:
         ALL_CHR_SNPS = results_prefix / "all_chr_snps_{YSEQID}_{REF}.vcf.gz"
     conda:

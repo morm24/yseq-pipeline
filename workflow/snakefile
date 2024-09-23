@@ -11,6 +11,10 @@ samples_df = pd.DataFrame(pd.read_csv("./config/samples.csv"))
 yseqids = samples_df["YSEQID"].to_list()
 refs = samples_df["REF"].to_list()  # Fill missing values with 'hg38'   #.fillna("hg38")
 
+wildcard_constraints:
+    REF = "hg38|hs1",
+    YSEQID = r"\d{1,6}"
+
 # Create a list of tuples for wildcards
 wildcards = [(yseqid, ref) for yseqid, ref in zip(yseqids, refs)]
 
@@ -50,9 +54,7 @@ rule all:
 
 
 
-wildcard_constraints:
-    REF = "hg38|hs1",
-    YSEQID = r"\d{1,6}"
+
 
 ##### target rules #####
 
@@ -62,6 +64,7 @@ include: "rules/seperate_bam.smk"
 include: "rules/get_sample_snps.smk"
 include: "rules/cladefinder.smk"
 include: "rules/get_mtdifferences.smk"
+#include: "rules/all_chr_snps.smk"
 include: "rules/all_chr_snps_onerule.smk"
 
 
@@ -76,6 +79,7 @@ include: "rules/all_chr_snps_onerule.smk"
 #snakemake -npc 32 --dag
 #snakemake --forceall
 #snakemake -c32 > snakemake.log 2>&1
+#snakemake -p --use-conda -c 32
 
 
 #snakemake -c 32 -id 63819 -ref hg38
