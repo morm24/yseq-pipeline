@@ -34,6 +34,17 @@ The YSEQ Y-DNA Analysis Pipeline is designed to process paired ended fastq.gz fi
     ```sh
     apt install snakemake
     ```
+4. **Install conda & mamba:**
+    ### Install and set up miniconda 
+    ```sh
+    wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda3/miniconda.sh
+    bash ~/miniconda3/miniconda.sh -b -u -p ~/miniconda3
+    conda config --set channel_priority strict
+    ```
+    ### Install mamba:
+    ```sh
+    conda install -n base -c conda-forge mamba
+    ```
 
 ## Usage
 1. **Prepare the input files:**
@@ -106,7 +117,8 @@ To download the latest YFull YTree updates, follow these steps:
 3. Place the downloaded JSON file in the `resources/tree` directory and rename it to `latest_YFull_YTree.json`.
 
 ## Example
-Here is an example of how to run the pipeline with sample data:
+When set up corectly, and placed the hs1 sequence into `resources/refseq/hs1/hs1.fa` the following example workflow should run without errors and should take about 5 minutes to finish (faster with more cores): 
+`snakemake -pc 1`
 
 
 ## License

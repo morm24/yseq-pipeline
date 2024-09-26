@@ -1,7 +1,7 @@
 rule call_all_chr_snps:
     input:
         SORTED_BAM =    results_prefix / "{YSEQID}_bwa_mem_{REF}_sorted.bam",
-        REFSEQ =        "resources/refseq/{REF}/{REF}.fa"
+        REFSEQ =        ref_prefix / "{REF}/{REF}.fa"
     output:
         CHR1_VCF =     temp(tmp_prefix / "chr1_{YSEQID}_{REF}.vcf.gz"),
         CHR2_VCF =     temp(tmp_prefix / "chr2_{YSEQID}_{REF}.vcf.gz"),

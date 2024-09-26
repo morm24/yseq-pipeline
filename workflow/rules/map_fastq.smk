@@ -1,8 +1,8 @@
 rule index_refseq_minimap2:
     input:
-        REFSEQ = resources_prefix / "{REF}/{REF}.fa"
+        REFSEQ = ref_prefix / "{REF}/{REF}.fa"
     output:
-        INDEX = resources_prefix / "{REF}/{REF}.fa.mmi"
+        INDEX = ref_prefix / "{REF}/{REF}.fa.mmi"
     log:
         log_prefix / "{REF}/{REF}.log"
     conda:
@@ -17,8 +17,8 @@ rule map_minimap2:
         READS_1 = sample_prefix / "{YSEQID}_R1.fastq.gz",
         READS_2 = sample_prefix / "{YSEQID}_R2.fastq.gz",
         #
-        INDEX  = resources_prefix / "{REF}/{REF}.fa.mmi",
-        REFSEQ = resources_prefix / "{REF}/{REF}.fa"
+        INDEX  = ref_prefix / "{REF}/{REF}.fa.mmi",
+        REFSEQ = ref_prefix / "{REF}/{REF}.fa"
         #"./resources/refseq/{REF}/{REF}.fa"
     output: 
         BAM = results_prefix / "{YSEQID}_minimap2_{REF}.bam"
@@ -36,13 +36,13 @@ rule map_minimap2:
 
 rule index_refseq_bwa:
     input:
-        REFSEQ = resources_prefix / "{REF}/{REF}.fa"
+        REFSEQ = ref_prefix / "{REF}/{REF}.fa"
     output:
-        BWT = resources_prefix / "{REF}/{REF}.fa.bwt",
-        AMB = resources_prefix / "{REF}/{REF}.fa.amb",
-        ANN = resources_prefix / "{REF}/{REF}.fa.ann",
-        PAC = resources_prefix / "{REF}/{REF}.fa.pac",
-        SA  = resources_prefix / "{REF}/{REF}.fa.sa"
+        BWT = ref_prefix / "{REF}/{REF}.fa.bwt",
+        AMB = ref_prefix / "{REF}/{REF}.fa.amb",
+        ANN = ref_prefix / "{REF}/{REF}.fa.ann",
+        PAC = ref_prefix / "{REF}/{REF}.fa.pac",
+        SA  = ref_prefix / "{REF}/{REF}.fa.sa"
     log:
         log_prefix / "{REF}/{REF}.log"
     conda:
@@ -57,12 +57,12 @@ rule map_bwa:
         READS_1 = sample_prefix / "{YSEQID}_R1.fastq.gz",
         READS_2 = sample_prefix / "{YSEQID}_R2.fastq.gz",
         #
-        REFSEQ  = resources_prefix / "{REF}/{REF}.fa",
-        BWT = resources_prefix / "{REF}/{REF}.fa.bwt",
-        AMB = resources_prefix / "{REF}/{REF}.fa.amb",
-        ANN = resources_prefix / "{REF}/{REF}.fa.ann",
-        PAC = resources_prefix / "{REF}/{REF}.fa.pac",
-        SA  = resources_prefix / "{REF}/{REF}.fa.sa"
+        REFSEQ  = ref_prefix / "{REF}/{REF}.fa",
+        BWT = ref_prefix / "{REF}/{REF}.fa.bwt",
+        AMB = ref_prefix / "{REF}/{REF}.fa.amb",
+        ANN = ref_prefix / "{REF}/{REF}.fa.ann",
+        PAC = ref_prefix / "{REF}/{REF}.fa.pac",
+        SA  = ref_prefix / "{REF}/{REF}.fa.sa"
         #"./resources/refseq/{REF}/{REF}.fa"
     output: 
         BAM = results_prefix / "{YSEQID}_bwa-mem_{REF}.bam"

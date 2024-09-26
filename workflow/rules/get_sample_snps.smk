@@ -21,7 +21,7 @@ rule download_snps:
 rule get_all_SNPs_Sample:
     input:
         SORTED_BAM =    results_prefix / "{YSEQID}_bwa_mem_{REF}_sorted.bam",
-        REFSEQ =        "resources/refseq/{REF}/{REF}.fa"
+        REFSEQ =        ref_prefix / "{REF}/{REF}.fa"
     output:
         RAW_VCF =       temp(results_prefix / "chrY_raw_{YSEQID}_{REF}.vcf.gz")
     conda:
@@ -137,7 +137,7 @@ rule get_novel_SNPS:
 rule identity_resolution:
     input:
         NOVEL_VCF_TSV =     results_prefix / "chrY_novel_SNPs_{YSEQID}_{REF}.vcf.tsv",
-        REFSEQ =        "resources/refseq/{REF}/{REF}.fa"
+        REFSEQ =        ref_prefix / "{REF}/{REF}.fa"
     output:
         NOVEL_TSV =     results_prefix / "chrY_novel_SNPs_{YSEQID}_{REF}.tsv"
     conda:

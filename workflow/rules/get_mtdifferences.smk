@@ -1,7 +1,7 @@
 rule mt_consensus:
     input:
         BAM_SORTED = results_prefix / "{YSEQID}_bwa_mem_{REF}_sorted.bam",
-        REFSEQ = "resources/refseq/{REF}/{REF}.fa"
+        REFSEQ = ref_prefix / "{REF}/{REF}.fa"
 
     output:
         VCF = results_prefix / "chrM_{YSEQID}_{REF}.vcf.gz",

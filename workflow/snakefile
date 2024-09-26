@@ -10,9 +10,10 @@ configfile: "./config/config.yaml"
 samples_df = pd.DataFrame(pd.read_csv("./config/samples.csv"))
 yseqids = samples_df["YSEQID"].to_list()
 refs = samples_df["REF"].to_list()  # Fill missing values with 'hg38'   #.fillna("hg38")
+default_cores = config["THREADS"]
 
 wildcard_constraints:
-    REF = "hg38|hs1",
+    #REF = "hg38|hs1",
     YSEQID = r"\d{1,6}"
 
 # Create a list of tuples for wildcards
@@ -20,14 +21,14 @@ wildcards = [(yseqid, ref) for yseqid, ref in zip(yseqids, refs)]
 
 # global variables for path prefixes:
 # results:
-results_prefix = Path(config["results_refseq"]) / "{REF}"
-# resources:
-resources_prefix = Path("./resources/refseq/")
-log_prefix = resources_prefix / "logs"
+results_prefix = Path(config["RESULTS_PATH"]).resolve() / "{YSEQID}" / "{REF}"
+# reference sequences:
+ref_prefix = Path(config["REF_PATH"]).resolve()
+log_prefix = Path(config["LOG_PATH"]).resolve()
 env_path = Path(config["ENV_PATH"]).resolve()
 tmp_prefix =  Path(config["TMP_PATH"]).resolve()
 
-sample_prefix = Path(config["SAMPLE_PATH"]).resolve()
+sample_prefix = Path(config["SAMPLE_PATH"]).resolve()  / "{YSEQID}"
 
 
 rule all:

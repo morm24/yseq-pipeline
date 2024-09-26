@@ -5,7 +5,7 @@ for chr in chromosomes:
             f"call_all_snps_{chr}"
         input: 
             SORTED_BAM =    results_prefix / "{YSEQID}_bwa_mem_{REF}_sorted.bam",
-            REFSEQ =        "resources/refseq/{REF}/{REF}.fa"
+            REFSEQ =        ref_prefix / "{REF}/{REF}.fa"
         output: 
             VCF =           temp(f"resources/tmp/{chr}_{{YSEQID}}_{{REF}}.vcf.gz")
         conda:
