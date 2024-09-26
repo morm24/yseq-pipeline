@@ -134,10 +134,11 @@ rule get_novel_SNPS:
         tabix {output.NOVEL_VCF}
         zcat {output.NOVEL_VCF} | grep -v "##" >{output.NOVEL_VCF_TSV}
         """
-rule identity_resolution:
+rule confirm_novel_SNPS:
     input:
         NOVEL_VCF_TSV =     results_prefix / "chrY_novel_SNPs_{YSEQID}_{REF}.vcf.tsv",
-        REFSEQ =        ref_prefix / "{REF}/{REF}.fa"
+        REFSEQ =            ref_prefix / "{REF}/{REF}.fa",
+        MM2_INDEX =         ref_prefix / "{REF}/{REF}.fa.mmi"
     output:
         NOVEL_TSV =     results_prefix / "chrY_novel_SNPs_{YSEQID}_{REF}.tsv"
     conda:

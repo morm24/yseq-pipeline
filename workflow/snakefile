@@ -10,7 +10,7 @@ configfile: "./config/config.yaml"
 samples_df = pd.DataFrame(pd.read_csv("./config/samples.csv"))
 yseqids = samples_df["YSEQID"].to_list()
 refs = samples_df["REF"].to_list()  # Fill missing values with 'hg38'   #.fillna("hg38")
-default_cores = config["THREADS"]
+#default_threads = config["THREADS"]
 
 wildcard_constraints:
     #REF = "hg38|hs1",
@@ -42,7 +42,7 @@ rule all:
         #expand(results_prefix / "{YSEQID}_{REF}_positives.txt",         zip, YSEQID=yseqids, REF=refs),
         #expand(results_prefix / "{YSEQID}_{REF}_negatives.txt",         zip, YSEQID=yseqids, REF=refs),
         #expand(results_prefix / "{YSEQID}_{REF}haploData.txt",           zip, YSEQID=yseqids, REF=refs),
-        expand(results_prefix / "{YSEQID}_{REF}_MTDNA_SNPS.tsv",         zip, YSEQID=yseqids, REF=refs),
+        #expand(results_prefix / "{YSEQID}_{REF}_MTDNA_SNPS.tsv",         zip, YSEQID=yseqids, REF=refs),
         expand(results_prefix / "chrY_INDELs_{YSEQID}_{REF}.gz",         zip, YSEQID=yseqids, REF=refs),
         expand(results_prefix / "{YSEQID}_{REF}_PHYLOEQ_SNPS.tsv",       zip, YSEQID=yseqids, REF=refs),
         expand(results_prefix / "{YSEQID}_{REF}_DOWNSTR_SNPS.tsv",       zip, YSEQID=yseqids, REF=refs),

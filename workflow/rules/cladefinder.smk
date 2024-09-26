@@ -28,7 +28,7 @@ rule check_HG:
         NEGATIVE_TXT =  results_prefix / "{YSEQID}_{REF}_negatives.txt",
         YFULLTREE =     "resources/tree/latest_YFull_YTree.json"
     output:
-        temp(results_prefix / "{YSEQID}_{REF}cladeFinderOutput.csv"),
+        results_prefix / "{YSEQID}_{REF}cladeFinderOutput.csv"
     conda:
         env_path / "bam_process.yaml"
         
@@ -42,7 +42,7 @@ rule save_HG:
         CF_CSV =        results_prefix / "{YSEQID}_{REF}cladeFinderOutput.csv",
     output:
         HAPLO_DATA =    results_prefix / "{YSEQID}_{REF}haploData.txt",
-        HAPLO_GROUP =   temp(results_prefix / "{YSEQID}_{REF}haploGroup")
+        HAPLO_GROUP =   results_prefix / "{YSEQID}_{REF}haploGroup"
     run:
         # Initialize variables
         YFULLHG = "unknown"

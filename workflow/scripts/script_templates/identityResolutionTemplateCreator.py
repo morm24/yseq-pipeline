@@ -2,7 +2,7 @@
 """
 Created on Wed Feb 12 14:13:00 2020
 
-@author: hunte
+@author: hunter, Moritz Berger
 """
 
 #pip install
@@ -14,9 +14,12 @@ import sys
 import time
 import subprocess
     
-def createBED(pos, bedFile):
+def createBED(pos, bedFile,refseq):
     with open(bedFile, "w") as w:
-        w.write("\t".join(["chrY",str(pos-1-500),str(pos + 500)]) + "\n")
+        if refseq == "hs1": 
+            w.write("\t".join(["CP086569.2",str(pos-1-500),str(pos + 500)]) + "\n") 
+        else: 
+            w.write("\t".join(["chrY",str(pos-1-500),str(pos + 500)]) + "\n")
     w.close()
 
 
@@ -105,11 +108,11 @@ def createFastQ(seq, fastQFilename):
         w.write(dummy + "\n")
     w.close()
     
-def oneOff(referenceFile, refIndexFile, position):
+def oneOff(referenceFile, refIndexFile, position, refseq):
     bedFile = "bed.bed"+str(position)
     fastQFile = "fastq.fastq"+str(position)
     
-    createBED(position, bedFile)
+    createBED(position, bedFile,refseq)
     seq = getSequenceFromFasta(bedFile, referenceFile)
     createFastQ(seq, fastQFile)
     pafOutputFile = "alignment.paf"+str(position)
@@ -120,10 +123,10 @@ def testPAF(refIndexFile, position):
     pafOutputFile = "alignment.paf"+str(position)
     return parsePAF(position, pafOutputFile)
 
-def blatOneOff(referenceFile, position):
+def blatOneOff(referenceFile, position, refseq):
     bedFile = "bed.bed"
     
-    createBED(position, bedFile)
+    createBED(position, bedFile, refseq)
     blatFile = str(position) + "_BLAT"
     seq = getSequenceFromFasta(bedFile, referenceFile)
     print(seq)
@@ -178,7 +181,7 @@ def lineProcessing(line, w, referenceFile, refIndexFile, refseq, output, passing
             passing.append(pos)
     #print(cov)
     if checkedRange == "ok":
-        checkedRange = oneOff(referenceFile, refIndexFile, intpos)
+        checkedRange = oneOff(referenceFile, refIndexFile, intpos, refseq)
 
         os.remove("fastq.fastq"+str(pos))
         os.remove("bed.bed"+str(pos))
@@ -187,9 +190,12 @@ def lineProcessing(line, w, referenceFile, refIndexFile, refseq, output, passing
     if checkedRange == "ok":
         passing.append(pos)
         
-
-    blatLink = "https://ket.yseq.de:8443/Finch/FTDNA_EDI/Primer3/input?seq=ChrY:" + str(intpos - 500) + ".." + str(intpos+500) + "&name=" + idVal
-    uscsGenomeBrowser = "http://genome.ucsc.edu/cgi-bin/hgTracks?db=" + refseq + "&lastVirtModeType=default&lastVirtModeExtraState=&virtModeType=default&virtMode=0&nonVirtPosition=&position=chrY%3A" + str(intpos - 5) + "%2D" + str(intpos + 5) + "&hgsid=661900165_RCnZU2Sd4dWMqySzhwCkmOqVSxQI"
+    if referenceFile == "hs1.fa":
+        blatLink = "https://ket.yseq.de:8443/Finch/FTDNA_EDI/Primer3/input?seq=CP086569.2:" + str(intpos - 500) + ".." + str(intpos+500) + "&name=" + idVal
+        uscsGenomeBrowser = "http://genome.ucsc.edu/cgi-bin/hgTracks?db=" + refseq + "&lastVirtModeType=default&lastVirtModeExtraState=&virtModeType=default&virtMode=0&nonVirtPosition=&position=CP086569.2%3A" + str(intpos - 5) + "%2D" + str(intpos + 5) + "&hgsid=661900165_RCnZU2Sd4dWMqySzhwCkmOqVSxQI"
+    else:
+        blatLink = "https://ket.yseq.de:8443/Finch/FTDNA_EDI/Primer3/input?seq=ChrY:" + str(intpos - 500) + ".." + str(intpos+500) + "&name=" + idVal
+        uscsGenomeBrowser = "http://genome.ucsc.edu/cgi-bin/hgTracks?db=" + refseq + "&lastVirtModeType=default&lastVirtModeExtraState=&virtModeType=default&virtMode=0&nonVirtPosition=&position=chrY%3A" + str(intpos - 5) + "%2D" + str(intpos + 5) + "&hgsid=661900165_RCnZU2Sd4dWMqySzhwCkmOqVSxQI"
     rowSplit = rowSplit + [checkedRange, blatLink, uscsGenomeBrowser]
 
     
@@ -207,7 +213,7 @@ def analyzeNovelSNPs(vcfFile, outputFile, referenceFile):
 
     refIndexFile = referenceFile + ".mmi"
     refseq = "hg38"
-    if referenceFile.find("hs1") > 0:
+    if referenceFile == "hs1.fa":
         refseq = "hs1"
     start_time = time.time()
     passing = []
@@ -261,18 +267,23 @@ if len(sys.argv) > 3:
         vcfFile = sys.argv[2]
         outputFile = sys.argv[3]
         referenceFile = sys.argv[4]
-        analyzeNovelSNPs(vcfFile, outputFile, referenceFile)        
+        analyzeNovelSNPs(vcfFile, outputFile, referenceFile)  
+        if len(sys.argv) > 5:
+            temp = sys.argv[5]      
     else:
         if mode == "-blat":
             delay = 16
             results = []
             referenceFile = sys.argv[2]
+            refseq = "hg38"
+            if referenceFile == "hs1.fa":
+                refseq = "hs1"
             positions = []
             oktotal = 0
             for pos in sys.argv[3].split(","):
                 positions.append(int(pos))
             for pos in positions:
-                result = blatOneOff(referenceFile, pos)
+                result = blatOneOff(referenceFile, pos, refseq)
                 if result == "ok":
                     oktotal = oktotal + 1
                 results.append(str(pos) + " " + result)
@@ -283,5 +294,8 @@ if len(sys.argv) > 3:
         else:
             if mode == "-minimap":
                 referenceFile = sys.argv[2]
+                refseq = "hg38"
+                if referenceFile == "hs1.fa":
+                    refseq = "hs1"
                 position = int(sys.argv[3])
-                print(oneOff(referenceFile, position))
+                print(oneOff(referenceFile, position, refseq))
