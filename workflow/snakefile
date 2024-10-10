@@ -87,3 +87,6 @@ include: "rules/all_chr_snps_onerule.smk"
 
 
 #snakemake --touch
+
+
+#warning!  java needs to be installed  (apt install default-jre)

@@ -8,3 +8,4 @@ dependencies:
   - gzip=1.13
   - tabix=1.11
   - wget=1.21.4
+  - psutil=5.9.4
