@@ -59,8 +59,7 @@ The YSEQ Y-DNA Analysis Pipeline is designed to process paired ended fastq.gz fi
 
     #### add both to the samples.csv
     Add all SampleIDs to the file `config/samples.csv`. 
-    Separated with a "," note the reference sequence, you want to map and analyze the sample to.
-    Example: 
+    Separated with a "," state the name of the reference (file name without ending).    Example: 
     ```
     ID,REF
     63819,hs1
@@ -110,7 +109,7 @@ wget https://hgdownload.soe.ucsc.edu/goldenPath/hg19/bigZips/hg19.fa.gz
 wget https://hgdownload.soe.ucsc.edu/goldenPath/hs1/bigZips/hs1.fa.gz
 ```
 
-## YFull YTree Updates
+## YFull YTree Updates  TO DO: change to free version
 To download the latest YFull YTree updates, follow these steps:
 1. Visit the [YFull YTree website](https://www.yfull.com/tree/).
 2. Download the latest JSON file from the resources section.

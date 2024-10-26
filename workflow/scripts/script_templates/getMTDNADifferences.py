@@ -2,7 +2,7 @@
 """
 Created on Wed Mar  4 17:50:06 2020
 
-@author: hunter
+@author: hunter, moritz
 """
 
 import sys
@@ -214,6 +214,8 @@ if len(sys.argv) > 4:
         vcfFile = sys.argv[2]
         haplogrepJar = sys.argv[3]
         outFile = sys.argv[4]
+        if len(sys.argv) > 5:
+            haplogrepOutputFile = sys.argv[5]
         process()
         
     if sys.argv[1] == "-update":

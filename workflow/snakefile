@@ -25,7 +25,7 @@ results_prefix = Path(config["RESULTS_PATH"]).resolve() / "{YSEQID}" / "{REF}"
 # reference sequences:
 ref_prefix = Path(config["REF_PATH"]).resolve()
 log_prefix = Path(config["LOG_PATH"]).resolve()
-env_path = Path(config["ENV_PATH"]).resolve()
+#env_path = Path(config["ENV_PATH"]).resolve()
 tmp_prefix =  Path(config["TMP_PATH"]).resolve()
 
 sample_prefix = Path(config["SAMPLE_PATH"]).resolve()  / "{YSEQID}"
@@ -33,24 +33,24 @@ sample_prefix = Path(config["SAMPLE_PATH"]).resolve()  / "{YSEQID}"
 
 rule all:
     input:
-        expand(results_prefix / "tview_{YSEQID}_{REF}.sh",               zip, YSEQID=yseqids, REF=refs), # pick row-wise 
-        expand(results_prefix / "{YSEQID}_bwa-mem_{REF}_chrY.bam",       zip, YSEQID=yseqids, REF=refs),
-        expand(results_prefix / "{YSEQID}_bwa-mem_{REF}_rCRS_chrM.bam",  zip, YSEQID=yseqids, REF=refs),
+        expand(results_prefix / "mapping" / "tview_{YSEQID}_{REF}.sh",               zip, YSEQID=yseqids, REF=refs), # pick row-wise 
+        expand(results_prefix / "mapping" / "{YSEQID}_bwa-mem_{REF}_chrY.bam",       zip, YSEQID=yseqids, REF=refs),
+        expand(results_prefix / "mapping" / "{YSEQID}_bwa-mem_{REF}_rCRS_chrM.bam",  zip, YSEQID=yseqids, REF=refs),
         #expand(results_prefix / "{YSEQID}_bwa_mem_{REF}_sorted.bam",     zip, YSEQID=yseqids, REF=refs),
         #expand(results_prefix / "{YSEQID}_{REF}_mtDNA.fasta",            zip, YSEQID=yseqids, REF=refs),
-        expand(results_prefix / "{YSEQID}_{REF}_mapping_stats.txt",      zip, YSEQID=yseqids, REF=refs),
+        expand(results_prefix / "mapping" / "{YSEQID}_{REF}_mapping_stats.txt",      zip, YSEQID=yseqids, REF=refs),
         #expand(results_prefix / "{YSEQID}_{REF}_positives.txt",         zip, YSEQID=yseqids, REF=refs),
         #expand(results_prefix / "{YSEQID}_{REF}_negatives.txt",         zip, YSEQID=yseqids, REF=refs),
         #expand(results_prefix / "{YSEQID}_{REF}haploData.txt",           zip, YSEQID=yseqids, REF=refs),
         #expand(results_prefix / "{YSEQID}_{REF}_MTDNA_SNPS.tsv",         zip, YSEQID=yseqids, REF=refs),
-        expand(results_prefix / "chrY_INDELs_{YSEQID}_{REF}.gz",         zip, YSEQID=yseqids, REF=refs),
-        expand(results_prefix / "{YSEQID}_{REF}_PHYLOEQ_SNPS.tsv",       zip, YSEQID=yseqids, REF=refs),
-        expand(results_prefix / "{YSEQID}_{REF}_DOWNSTR_SNPS.tsv",       zip, YSEQID=yseqids, REF=refs),
+        expand(results_prefix / "snp_calling" / "chrY_INDELs_{YSEQID}_{REF}.gz",         zip, YSEQID=yseqids, REF=refs),
+        expand(results_prefix / "cladefinder" / "{YSEQID}_{REF}_PHYLOEQ_SNPS.tsv",       zip, YSEQID=yseqids, REF=refs),
+        expand(results_prefix / "cladefinder" / "{YSEQID}_{REF}_DOWNSTR_SNPS.tsv",       zip, YSEQID=yseqids, REF=refs),
         #expand(results_prefix / "{YSEQID}_{REF}_result_summary.txt",     zip, YSEQID=yseqids, REF=refs),
-        expand(results_prefix / "all_chr_snps_{YSEQID}_{REF}.vcf.gz",    zip, YSEQID=yseqids, REF=refs),
+        expand(results_prefix / "call_chr_snps" / "all_chr_snps_{YSEQID}_{REF}.vcf.gz",    zip, YSEQID=yseqids, REF=refs),
         #expand(results_prefix / "{YSEQID}_{REF}_update.sh",              zip, YSEQID=yseqids, REF=refs),
-        expand(results_prefix / "chrY_novel_SNPs_{YSEQID}_{REF}.tsv",    zip, YSEQID=yseqids, REF=refs),
-        expand(results_prefix / "{YSEQID}_{REF}_addAlleles.tsv",         zip, YSEQID=yseqids, REF=refs)
+        expand(results_prefix  / "snp_calling" / "chrY_novel_SNPs_{YSEQID}_{REF}.tsv",    zip, YSEQID=yseqids, REF=refs),
+        expand(results_prefix / "cladefinder" / "{YSEQID}_{REF}_addAlleles.tsv",         zip, YSEQID=yseqids, REF=refs)
         #expand("addAlleles.tsv",         zip, YSEQID=yseqids, REF=refs)
 
 
@@ -61,12 +61,12 @@ rule all:
 
 include: "rules/map_fastq.smk"
 include: "rules/create_easy_tview.smk"
-include: "rules/seperate_bam.smk"
 include: "rules/get_sample_snps.smk"
 include: "rules/cladefinder.smk"
 include: "rules/get_mtdifferences.smk"
-#include: "rules/all_chr_snps.smk"
-include: "rules/all_chr_snps_onerule.smk"
+include: "rules/all_chr_snps.smk"
+#include: "rules/seperate_bam.smk"
+#include: "rules/all_chr_snps_onerule.smk"
 
 
 

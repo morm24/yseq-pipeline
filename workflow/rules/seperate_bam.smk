@@ -1,10 +1,10 @@
 rule seperate_yBAM:
     input:
-        BAM = results_prefix / "{YSEQID}_bwa_mem_{REF}_sorted.bam"
+        BAM = results_prefix / "mapping" / "{YSEQID}_bwa_mem_{REF}_sorted.bam"
     output:
         YBAM = results_prefix / "{YSEQID}_bwa-mem_{REF}_chrY.bam"
     conda:
-        env_path / "bam_process.yaml"
+        "bam_process"
     threads: 
         workflow.cores * 1
     shell:
@@ -14,11 +14,11 @@ rule seperate_yBAM:
         """
 rule seperate_mtBAM:
     input:
-        SORTED_BAM =    results_prefix / "{YSEQID}_bwa_mem_{REF}_sorted.bam"    
+        SORTED_BAM =    results_prefix / "mapping" / "{YSEQID}_bwa_mem_{REF}_sorted.bam"    
     output:
         MTBAM = results_prefix / "{YSEQID}_bwa-mem_{REF}_rCRS_chrM.bam"
     conda:
-        env_path / "bam_process.yaml"
+        "bam_process"
     threads: 
         workflow.cores * 1
     shell:

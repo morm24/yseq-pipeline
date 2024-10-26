@@ -253,7 +253,7 @@ def analyzeNovelSNPs(vcfFile, outputFile, referenceFile):
         w.close()
     f.close()
 
-    with open("novelPassingPositionsForBLATCheck.txt", "w") as w:
+    with open(novelPassingOut, "w") as w:
         w.write(",".join(passing))
     w.close()    
     end_time = time.time()
@@ -267,9 +267,10 @@ if len(sys.argv) > 3:
         vcfFile = sys.argv[2]
         outputFile = sys.argv[3]
         referenceFile = sys.argv[4]
-        analyzeNovelSNPs(vcfFile, outputFile, referenceFile)  
         if len(sys.argv) > 5:
-            temp = sys.argv[5]      
+            novelPassingOut = sys.argv[5] 
+        analyzeNovelSNPs(vcfFile, outputFile, referenceFile)  
+   
     else:
         if mode == "-blat":
             delay = 16
