@@ -6,6 +6,8 @@ rule download_snps:
         "get_sample_snps"
     log:
         results_prefix / "snp_calling" / "logs" / "load_snps_{REF}.log"
+    benchmark:
+        results_prefix / "snp_calling" / "benchmark" / "load_snps_{REF}.benchmark"
     shell:
         """
         (
@@ -24,7 +26,7 @@ rule download_snps:
 
 rule get_all_SNPs_Sample:
     input:
-        SORTED_BAM =    results_prefix / "mapping" / "{YSEQID}_bwa_mem_{REF}_sorted.bam",
+        SORTED_BAM =    results_prefix / "mapping" / "{YSEQID}_bwa-mem_{REF}_sorted.bam",
         REFSEQ =        ref_prefix / "{REF}/{REF}.fa"
     output:
         RAW_VCF =       temp(results_prefix  / "snp_calling" / "chrY_raw_{YSEQID}_{REF}.vcf.gz")
@@ -34,6 +36,8 @@ rule get_all_SNPs_Sample:
         "get_sample_snps"
     log:
         results_prefix / "snp_calling" / "logs" / "{YSEQID}_{REF}_bcf_mpileup.log"
+    benchmark:
+        results_prefix / "snp_calling" / "benchmark" / "{YSEQID}_{REF}_bcf_mpileup.benchmark"
     threads:
         workflow.cores * 1
     shell:
@@ -54,6 +58,8 @@ rule merge_SNPS_HARRY_ALIEN_SAMPLE:
         "get_sample_snps"
     log:
         results_prefix / "snp_calling" / "logs" / "{YSEQID}_{REF}_bcf_merge.log"
+    benchmark:
+        results_prefix / "snp_calling" / "benchmark" / "{YSEQID}_{REF}_bcf_merge.benchmark"
     group:
         "get_sample_snps"
     shell:
@@ -71,6 +77,8 @@ rule get_differences_HARRY_ALIEN_SAMPLE:
         "get_sample_snps"
     log:
         results_prefix / "snp_calling" / "logs" / "{YSEQID}_{REF}_bcf_call.log"
+    benchmark:
+        results_prefix / "snp_calling" / "benchmark" / "{YSEQID}_{REF}_bcf_call.benchmark"
     group:
         "get_sample_snps"
     shell:
@@ -88,6 +96,8 @@ rule rm_HARRY_ALIEN_from_VCF:
         "get_sample_snps"
     log:
         results_prefix / "snp_calling" / "logs" / "{YSEQID}_{REF}_bcf__view_rm_HARRY_ALIEN.log"
+    benchmark:
+        results_prefix / "snp_calling" / "benchmark" / "{YSEQID}_{REF}_bcf__view_rm_HARRY_ALIEN.benchmark"
     group:
         "get_sample_snps"
     shell:
@@ -105,6 +115,8 @@ rule extract_ancestral_SNPS:
         "get_sample_snps"
     log:
        results_prefix / "snp_calling" / "logs" / "{YSEQID}_{REF}_bcf_filter_ancestral.log"
+    benchmark:
+        results_prefix / "snp_calling" / "benchmark" / "{YSEQID}_{REF}_bcf_filter_ancestral.benchmark"
     group:
         "get_sample_snps"
     threads:
@@ -124,6 +136,8 @@ rule extract_derived_SNPS:
         "get_sample_snps"
     log:
         results_prefix / "snp_calling" / "logs" / "{YSEQID}_{REF}_bcf_filter_derived.log"
+    benchmark:
+        results_prefix / "snp_calling" / "benchmark" / "{YSEQID}_{REF}_bcf_filter_derived.benchmark"
     group:
         "get_sample_snps"
     threads:
@@ -144,6 +158,8 @@ rule get_novel_SNPS:
         "get_sample_snps"
     log:
         results_prefix / "snp_calling" / "logs" / "{YSEQID}_{REF}_bcf_filter_novel.log"
+    benchmark:
+        results_prefix / "snp_calling" / "benchmark" / "{YSEQID}_{REF}_bcf_filter_novel.benchmark"
     group:
         "get_sample_snps"
     shell:
@@ -164,6 +180,8 @@ rule confirm_novel_SNPS:
         "get_sample_snps"
     log:
         results_prefix / "snp_calling" / "logs" / "{YSEQID}_{REF}_confirm_novel_snps.log"
+    benchmark:
+        results_prefix / "snp_calling" / "benchmark" / "{YSEQID}_{REF}_confirm_novel_snps.benchmark"
     threads:
         workflow.cores  # Reserve all cores because the script allocates them dynamically
     group:
@@ -181,6 +199,8 @@ rule indel_calling:
         "get_sample_snps"
     log:
         results_prefix / "snp_calling" / "logs" / "{YSEQID}_{REF}_bcf_filter_indels.log"
+    benchmark:
+        results_prefix / "snp_calling" / "benchmark" / "{YSEQID}_{REF}_bcf_filter_indels.benchmark"
     group:
         "get_sample_snps"
     shell:

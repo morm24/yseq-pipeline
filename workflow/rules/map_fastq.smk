@@ -4,7 +4,9 @@ rule index_refseq_minimap2:
     output:
         INDEX = ref_prefix / "{REF}/{REF}.fa.mmi"
     log:
-        ref_prefix / "{REF}/{REF}minimap2_index.log"
+        ref_prefix / "{REF}/{REF}_minimap2_index.log"
+    benchmark:
+        ref_prefix / "{REF}/{REF}_minimap2_index.benchmark"
     conda:
         "mapping"
     shell:
@@ -27,6 +29,8 @@ rule map_minimap2:
         "mapping"
     log:
         results_prefix / "mapping" / "logs" / "{YSEQID}_minimap2_{REF}.log"
+    benchmark:
+        results_prefix / "mapping" / "benchmark" / "{YSEQID}_minimap2_{REF}.benchmark"
     params:
         "-a -x sr -t " if (config["READS"] == "short") else "-ax map-ont -t" #if (config["READS"] == "nanopore") "-ax map-ont -t" else "-at"#-t has to be last!
     threads: workflow.cores
@@ -47,7 +51,9 @@ rule index_refseq_bwa:
         PAC = ref_prefix / "{REF}/{REF}.fa.pac",
         SA  = ref_prefix / "{REF}/{REF}.fa.sa"
     log:
-        ref_prefix / "{REF}/{REF}bwa_index.log"
+        ref_prefix / "{REF}/{REF}_bwa_index.log"
+    benchmark:
+        ref_prefix / "{REF}/{REF}_bwa_index.benchmark"
     conda:
         "mapping"
     shell:
@@ -73,6 +79,8 @@ rule map_bwa:
         "mapping"
     log:
         results_prefix / "mapping" / "logs" / "{YSEQID}_bwa-mem_{REF}.log"
+    benchmark:
+        results_prefix / "mapping" / "benchmark" / "{YSEQID}_bwa-mem_{REF}.benchmark"
     params:
         BWA = "-M -t " #-t has to be last!
     threads: workflow.cores
@@ -86,13 +94,15 @@ rule sort_and_index:
     input:
         BAM = results_prefix / "mapping" / "{YSEQID}_bwa-mem_{REF}.bam" if (config["MAPPER"] == "bwa") else results_prefix / "{YSEQID}_minimap2_{REF}.bam" #elif (config["MAPPER"] == "minimap2") results_prefix / "{YSEQID}_minimap2_{REF}.bam"
     output:
-        SORTED_BAM = results_prefix / "mapping" / "{YSEQID}_bwa_mem_{REF}_sorted.bam",
-        BAI = results_prefix / "mapping" / "{YSEQID}_bwa_mem_{REF}_sorted.bam.bai",
-        IDXSTATS = results_prefix / "mapping" / "{YSEQID}_bwa_mem_{REF}_sorted.bam.idxstats.tsv"
+        SORTED_BAM = results_prefix / "mapping" / "{YSEQID}_bwa-mem_{REF}_sorted.bam",
+        BAI = results_prefix / "mapping" / "{YSEQID}_bwa-mem_{REF}_sorted.bam.bai",
+        IDXSTATS = results_prefix / "mapping" / "{YSEQID}_bwa-mem_{REF}_sorted.bam.idxstats.tsv"
     conda:
         "mapping"
     log:
         results_prefix / "mapping" / "logs" / "{YSEQID}_{REF}_samtools_sort.log"
+    benchmark:
+        results_prefix / "mapping" / "benchmark" / "{YSEQID}_{REF}_samtools_sort.benchmark"
     params:
         #how do I pass the snakemake num threads to the tool?
         #NUM_THREADS = "-@ 4",
@@ -110,8 +120,8 @@ rule sort_and_index:
 #swap the code with bamstaistics or sth. like that
 rule get_mapping_statistics:
     input:
-        BAM = results_prefix / "mapping" / "{YSEQID}_bwa_mem_{REF}_sorted.bam",
-        IDXSTATS =  results_prefix / "mapping" / "{YSEQID}_bwa_mem_{REF}_sorted.bam.idxstats.tsv"
+        BAM = results_prefix / "mapping" / "{YSEQID}_bwa-mem_{REF}_sorted.bam",
+        IDXSTATS =  results_prefix / "mapping" / "{YSEQID}_bwa-mem_{REF}_sorted.bam.idxstats.tsv"
 
     output:
         STATS = results_prefix / "mapping" / "{YSEQID}_{REF}_mapping_stats.txt"
@@ -119,6 +129,8 @@ rule get_mapping_statistics:
         "mapping"
     log:
         results_prefix / "mapping" / "logs" / "{YSEQID}_{REF}_bamstats.log"
+    benchmark:
+        results_prefix / "mapping" / "benchmark" / "{YSEQID}_{REF}_bamstats.benchmark"
     threads: 
         workflow.cores * 1
     shell:
@@ -129,7 +141,7 @@ rule get_mapping_statistics:
 #chromosome = ["chrY", "chrM"]
 rule seperate_BAM:
     input:
-        BAM = results_prefix / "mapping" / "{YSEQID}_bwa_mem_{REF}_sorted.bam"
+        BAM = results_prefix / "mapping" / "{YSEQID}_bwa-mem_{REF}_sorted.bam"
         
     output:
         #CHR_BAM = expand(results_prefix / "mapping" / "{{YSEQID}}_bwa-mem_{{REF}}_{chr}.bam", chr=chromosome)
@@ -139,6 +151,8 @@ rule seperate_BAM:
         "mapping"
     log:
         results_prefix / "mapping" / "logs" / "{YSEQID}_bwa-mem_{REF}_{chr}.log"
+    benchmark:
+        results_prefix / "mapping" / "benchmark" / "{YSEQID}_bwa-mem_{REF}_{chr}.benchmark"
     threads: 
         workflow.cores * 1
     shell:

@@ -1,6 +1,6 @@
 rule mt_consensus:
     input:
-        BAM_SORTED = results_prefix / "mapping" / "{YSEQID}_bwa_mem_{REF}_sorted.bam",
+        BAM_SORTED = results_prefix / "mapping" / "{YSEQID}_bwa-mem_{REF}_sorted.bam",
         REFSEQ = ref_prefix / "{REF}/{REF}.fa"
 
     output:
@@ -11,6 +11,8 @@ rule mt_consensus:
         "bam_process"
     log:
         results_prefix / "mtdna" / "log" / "{YSEQID}_{REF}_mt_consensus.log"
+    benchmark:
+        results_prefix / "mtdna" / "benchmark" / "{YSEQID}_{REF}_mt_consensus.benchmark"
     threads:
         workflow.cores * 1
 
@@ -32,6 +34,8 @@ rule get_mtdna_differences_process:
         "bam_process"
     log:
         results_prefix / "mtdna" / "log" / "{YSEQID}_{REF}_mtDNA_differences_process.log"
+    benchmark:
+        results_prefix / "mtdna" / "benchmark" / "{YSEQID}_{REF}_mtDNA_differences_process.benchmark"
     shell:
         """
         python3 workflow/scripts/script_templates/getMTDNADifferences.py -process {input.VCF} haplogrep/haplogrep-2.1.25.jar {output.MTDNA_SNPS} {output.HAPLO_TSV} > {log} 2>&1
@@ -49,6 +53,8 @@ rule get_mtdna_differences_update:
         "bam_process"
     log:
         results_prefix / "mtdna" / "{YSEQID}_{REF}_mtDNA_differences_update.log"
+    benchmark:
+        results_prefix / "mtdna" / "benchmark" / "{YSEQID}_{REF}_mtDNA_differences_update.benchmark"
     shell:
         """
         mkdir -p {output.TEST_OUTPUT} > {log} 2>&1
@@ -67,6 +73,8 @@ rule get_mtDifferences_addAlleles:
         "bam_process"
     log:
         results_prefix / "mtdna" / "log" / "{YSEQID}_{REF}_mtDNA_differences_addAlleles.log"
+    benchmark:
+        results_prefix / "mtdna" / "benchmark" / "{YSEQID}_{REF}_mtDNA_differences_addAlleles.benchmark"
     shell:
         """
         (python3 workflow/scripts/script_templates/getMTDNADifferences.py -addAlleles {output.ALLELES_TSV} {input.MTDNA_SNPS} {wildcards.YSEQID} {input.MT_VCF} {input.PHYLOEQ_SNPS} {input.DOWNSTR_SNPS} chrY_{wildcards.YSEQID}_{wildcards.REF}.vcf.gz) > {log} 2>&1
@@ -87,6 +95,8 @@ rule get_mtDifferences_create_update_script:
         "bam_process"
     log:
         results_prefix / "mtdna" / "log" / "{YSEQID}_{REF}_mtDNA_differences_create_update_script.log"
+    benchmark:
+        results_prefix / "mtdna" / "benchmark" / "{YSEQID}_{REF}_mtDNA_differences_create_update_script.benchmark"
     shell:
         """
         (python3 workflow/scripts/script_templates/getMTDNADifferences.py -createUpdateScript \

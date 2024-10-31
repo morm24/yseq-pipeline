@@ -23,6 +23,7 @@ wildcards = [(yseqid, ref) for yseqid, ref in zip(yseqids, refs)]
 # results:
 results_prefix = Path(config["RESULTS_PATH"]).resolve() / "{YSEQID}" / "{REF}"
 # reference sequences:
+resources_prefix = Path("resources").resolve()
 ref_prefix = Path(config["REF_PATH"]).resolve()
 log_prefix = Path(config["LOG_PATH"]).resolve()
 #env_path = Path(config["ENV_PATH"]).resolve()
@@ -49,8 +50,9 @@ rule all:
         #expand(results_prefix / "{YSEQID}_{REF}_result_summary.txt",     zip, YSEQID=yseqids, REF=refs),
         expand(results_prefix / "call_chr_snps" / "all_chr_snps_{YSEQID}_{REF}.vcf.gz",    zip, YSEQID=yseqids, REF=refs),
         #expand(results_prefix / "{YSEQID}_{REF}_update.sh",              zip, YSEQID=yseqids, REF=refs),
-        expand(results_prefix  / "snp_calling" / "chrY_novel_SNPs_{YSEQID}_{REF}.tsv",    zip, YSEQID=yseqids, REF=refs),
-        expand(results_prefix / "cladefinder" / "{YSEQID}_{REF}_addAlleles.tsv",         zip, YSEQID=yseqids, REF=refs)
+        expand(results_prefix  / "snp_calling" /  "chrY_novel_SNPs_{YSEQID}_{REF}.tsv",    zip, YSEQID=yseqids, REF=refs),
+        expand(results_prefix / "cladefinder" / "{YSEQID}_{REF}_addAlleles.tsv",         zip, YSEQID=yseqids, REF=refs),
+       # expand(results_prefix  / "phenotyping" / "{YSEQID}_{REF}_phenotyping.alx",       zip, YSEQID=yseqids, REF=refs)
         #expand("addAlleles.tsv",         zip, YSEQID=yseqids, REF=refs)
 
 
@@ -65,6 +67,7 @@ include: "rules/get_sample_snps.smk"
 include: "rules/cladefinder.smk"
 include: "rules/get_mtdifferences.smk"
 include: "rules/all_chr_snps.smk"
+#include: "rules/phenotyping.smk"
 #include: "rules/seperate_bam.smk"
 #include: "rules/all_chr_snps_onerule.smk"
 

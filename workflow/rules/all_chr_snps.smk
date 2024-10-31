@@ -1,6 +1,6 @@
 rule call_chr_snp:
     input: 
-        SORTED_BAM =    results_prefix / "mapping" / "{YSEQID}_bwa_mem_{REF}_sorted.bam",
+        SORTED_BAM =    results_prefix / "mapping" / "{YSEQID}_bwa-mem_{REF}_sorted.bam",
         REFSEQ =        ref_prefix / "{REF}/{REF}.fa"
     output: 
         VCF =           temp("resources/tmp/{chr}_{YSEQID}_{REF}.vcf.gz")
@@ -23,6 +23,8 @@ rule combine_chr_snps:
     conda:
         "bam_process" 
     log: results_prefix / "call_chr_snps" / "log" / "combine_chr_snps_{YSEQID}_{REF}.log"
+    benchmark:
+        results_prefix / "call_chr_snps" / "benchmark" / "combine_chr_snps_{YSEQID}_{REF}.benchmark"
     shell:
         """
         bcftools concat -O z {input} -o {output.ALL_CHR_SNPS}  > {log} 2>&1

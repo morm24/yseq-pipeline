@@ -76,10 +76,10 @@ echo "Phenotyping alleles have been written to ${YSEQID}_phenotyping.alx"
 
 
 #cleanup
-rm -f ${SNP_LIST_NAME}_sorted*
-rm -f ${YSEQID}_phenotyping_*raw*
-rm -f ${YSEQID}_phenotyping_*called*
-rm -f ${YSEQID}_phenotyping_*annotated*
+#rm -f ${SNP_LIST_NAME}_sorted*
+#rm -f ${YSEQID}_phenotyping_*raw*
+#rm -f ${YSEQID}_phenotyping_*called*
+#rm -f ${YSEQID}_phenotyping_*annotated*
 
 END=$(date +%s.%N)
 

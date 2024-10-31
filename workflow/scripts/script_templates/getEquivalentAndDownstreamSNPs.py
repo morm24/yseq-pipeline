@@ -9,7 +9,7 @@ import json
 import sys
 import vcf
 
-yfullFile = "C:\YSEQ\FASTQ to hg38 Mapping\scripts\latest_YFull_YTree.json"
+#yfullFile = "C:\YSEQ\FASTQ to hg38 Mapping\scripts\latest_YFull_YTree.json"
 clade = "J-FGC58561"
 
 if len(sys.argv) > 5:

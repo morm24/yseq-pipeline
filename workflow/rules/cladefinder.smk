@@ -7,6 +7,8 @@ rule preprocessing_cladefinder_derived:
         "bam_process"
     log: 
         results_prefix / "cladefinder" /  "cladefinder.txt.log"
+    benchmark:
+        results_prefix / "cladefinder" / "benchmark" / "{YSEQID}_{REF}_preprocessing_cladefinder_derived.benchmark"
     shell:
         """
 	    (bcftools query -f '%ID,' {input.DERIVED_VCF} | sed ':a;N;$!ba;s/\\n//g' | tee {output.POSITIVE_TXT}) >> {log} 2>&1
@@ -21,6 +23,8 @@ rule preprocessing_cladefinder_ancestral:
         "bam_process"
     log: 
         results_prefix / "cladefinder" / "cladefinder.txt.log"
+    benchmark:
+        results_prefix / "cladefinder" / "benchmark" / "{YSEQID}_{REF}_preprocessing_cladefinder_ancestral.benchmark"
     shell:
         """
 	    (bcftools query -f '%ID,' {input.ANCESTRAL_VCF} | sed ':a;N;$!ba;s/\\n//g' | tee {output.NEGATIVE_TXT}) >> {log} 2>&1
@@ -37,6 +41,8 @@ rule check_HG:
         "bam_process"
     log: 
         results_prefix / "cladefinder" / "cladefinder.txt.log"
+    benchmark:
+        results_prefix / "cladefinder" / "benchmark" / "{YSEQID}_{REF}_check_HG.benchmark"
         
     shell:
         """
@@ -81,7 +87,7 @@ rule get_equivalent_and_downstream_SNPS:
         POSITIVES_TXT = results_prefix / "cladefinder" / "{YSEQID}_{REF}_positives.txt",
         NEGATIVES_TXT = results_prefix / "cladefinder" / "{YSEQID}_{REF}_negatives.txt",
         CLEANED_VCF =   results_prefix / "snp_calling" / "chrY_cleaned_{YSEQID}_{REF}.vcf.gz",
-        IDXSTATS =      results_prefix / "mapping" / "{YSEQID}_bwa_mem_{REF}_sorted.bam.idxstats.tsv",
+        IDXSTATS =      results_prefix / "mapping" / "{YSEQID}_bwa-mem_{REF}_sorted.bam.idxstats.tsv",
         HAPLO_GROUP =   results_prefix / "cladefinder" / "{YSEQID}_{REF}haploGroup"  
 
 
@@ -92,6 +98,8 @@ rule get_equivalent_and_downstream_SNPS:
         "bam_process" 
     log: 
         results_prefix / "cladefinder" / "getEQAndDownSNPs.txt.log"
+    benchmark:
+        results_prefix / "cladefinder" / "benchmark" / "{YSEQID}_{REF}_getEQAndDownSNPs.benchmark"
     shell:
         """
         YFULLHG=$(head -n 1 {input.HAPLO_GROUP})
