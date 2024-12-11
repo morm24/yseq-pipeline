@@ -4,21 +4,11 @@
 MAPPER: "bwa"          # Choose the mapper between "bwa" or "minimap2"
 READS: "short"         # Choose read type between "short" or "nanopore"
 READS_TYPE: "paired"   # Choose between "single" or "paired" end reads
-THREADS: 80            # Number of threads to use
 
 # Paths
-SAMPLE_PATH: "resources/sample"  # Directory for your sample fastq files              # Path for your results directory
+SAMPLE_PATH: "resources/sample"  # Directory for your sample fastq files  
 TMP_PATH: "resources/tmp"        # Path for temporary files
-#ENV_PATH: "workflow/envs"        # Path for different environments
 REF_PATH: "resources/refseq"     # Path for reference sequence
-
-# Results
 RESULTS_PATH: "results"        # Path for reference sequence results
 LOG_PATH: "log"       # Path for log files
 
-
-
-
-
-#maybe just set:       workdir: "path/to/workdir"
-#to let the user decide where to execute the pipeline

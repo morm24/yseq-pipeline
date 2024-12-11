@@ -1,3 +1,4 @@
+#download all known snps for HS1 or HG38, updated dayly
 rule download_snps:
     output:
         SNPS =          results_prefix  / "snp_calling" / "snps_{REF}.vcf.gz",
@@ -24,11 +25,13 @@ rule download_snps:
         ) > {log} 2>&1
         """
 
+#extract all SNPs from the sample
 rule get_all_SNPs_Sample:
     input:
         SORTED_BAM =    results_prefix / "mapping" / "{YSEQID}_bwa-mem_{REF}_sorted.bam",
         REFSEQ =        ref_prefix / "{REF}/{REF}.fa"
     output:
+        VCF_TBI =       temp(results_prefix  / "snp_calling" / "chrY_raw_{YSEQID}_{REF}.vcf.gz.tbi"),
         RAW_VCF =       temp(results_prefix  / "snp_calling" / "chrY_raw_{YSEQID}_{REF}.vcf.gz")
     conda:
         "get_sample_snps"
@@ -43,17 +46,19 @@ rule get_all_SNPs_Sample:
     shell:
         """
        ( bcftools mpileup -r chrY -C 0 --threads {threads} -O z -f {input.REFSEQ} {input.SORTED_BAM} > {output.RAW_VCF}) > {log} 2>&1
-	    tabix {output.RAW_VCF} >> {log} 2>&1
+	   ( tabix {output.RAW_VCF} ) >> {log} 2>&1
         """
 
-#HARRY = Human Ancestral Reconstructed Reference of th Y_chromosome; ALIEN ~ ALL Snips are devived allele
+
 rule merge_SNPS_HARRY_ALIEN_SAMPLE:
     input:
         SNPS =          results_prefix  / "snp_calling" / "snps_{REF}.vcf.gz",
         SNPS_TBI =      results_prefix  / "snp_calling" / "snps_{REF}.vcf.gz.tbi",
-        RAW_VCF =       results_prefix  / "snp_calling" / "chrY_raw_{YSEQID}_{REF}.vcf.gz"
+        RAW_VCF =       results_prefix  / "snp_calling" / "chrY_raw_{YSEQID}_{REF}.vcf.gz",
+        VCF_TBI =       results_prefix  / "snp_calling" / "chrY_raw_{YSEQID}_{REF}.vcf.gz.tbi"
     output:
-        MERGED_VCF =    temp(results_prefix  / "snp_calling" / "chrY_merged_{YSEQID}_{REF}.vcf.gz")
+        MERGED_VCF =    temp(results_prefix  / "snp_calling" / "chrY_merged_{YSEQID}_{REF}.vcf.gz"),
+        VCF_TBI =       temp(results_prefix  / "snp_calling" / "chrY_merged_{YSEQID}_{REF}.vcf.gz.tbi")
     conda:
         "get_sample_snps"
     log:
@@ -70,9 +75,11 @@ rule merge_SNPS_HARRY_ALIEN_SAMPLE:
 
 rule get_differences_HARRY_ALIEN_SAMPLE:
     input:
-        MERGED_VCF =    results_prefix  / "snp_calling" / "chrY_merged_{YSEQID}_{REF}.vcf.gz"
+        MERGED_VCF =    results_prefix  / "snp_calling" / "chrY_merged_{YSEQID}_{REF}.vcf.gz",
+        VCF_TBI =       results_prefix  / "snp_calling" / "chrY_merged_{YSEQID}_{REF}.vcf.gz.tbi"
     output:
-        CALLED_VCF =    temp(results_prefix  / "snp_calling" / "chrY_called_{YSEQID}_{REF}.vcf.gz")
+        CALLED_VCF =    results_prefix  / "snp_calling" / "chrY_called_{YSEQID}_{REF}.vcf.gz",
+        VCF_TBI =       temp(results_prefix  / "snp_calling" / "chrY_called_{YSEQID}_{REF}.vcf.gz.tbi")
     conda:
         "get_sample_snps"
     log:
@@ -89,9 +96,12 @@ rule get_differences_HARRY_ALIEN_SAMPLE:
 
 rule rm_HARRY_ALIEN_from_VCF:
     input:
-        CALLED_VCF =    results_prefix  / "snp_calling" / "chrY_called_{YSEQID}_{REF}.vcf.gz"
+        CALLED_VCF =    results_prefix  / "snp_calling" / "chrY_called_{YSEQID}_{REF}.vcf.gz",
+        VCF_TBI =       results_prefix  / "snp_calling" / "chrY_called_{YSEQID}_{REF}.vcf.gz.tbi"
     output:
-        CLEANED_VCF =   temp(results_prefix  / "snp_calling" / "chrY_cleaned_{YSEQID}_{REF}.vcf.gz")
+        #CLEANED_VCF =   temp(results_prefix  / "snp_calling" / "chrY_cleaned_{YSEQID}_{REF}.vcf.gz"),
+        CLEANED_VCF =   results_prefix  / "snp_calling" / "chrY_cleaned_{YSEQID}_{REF}.vcf.gz",
+        VCF_TBI =       temp(results_prefix  / "snp_calling" / "chrY_cleaned_{YSEQID}_{REF}.vcf.gz.tbi")
     conda:
         "get_sample_snps"
     log:
@@ -106,11 +116,13 @@ rule rm_HARRY_ALIEN_from_VCF:
 	    tabix {output.CLEANED_VCF} >> {log} 2>&1
         """
 
-rule extract_ancestral_SNPS:
+rule extract_derived_SNPS:
     input:
-        CLEANED_VCF =   results_prefix  / "snp_calling" / "chrY_cleaned_{YSEQID}_{REF}.vcf.gz"
+        CLEANED_VCF =   results_prefix  / "snp_calling" / "chrY_cleaned_{YSEQID}_{REF}.vcf.gz",
+        VCF_TBI =       results_prefix  / "snp_calling" / "chrY_cleaned_{YSEQID}_{REF}.vcf.gz.tbi"
     output:
-        DERIVED_VCF =   results_prefix  / "snp_calling" / "chrY_derived_{YSEQID}_{REF}.vcf.gz"
+        DERIVED_VCF =   results_prefix  / "snp_calling" / "chrY_derived_{YSEQID}_{REF}.vcf.gz",
+        VCF_TBI =       results_prefix  / "snp_calling" / "chrY_derived_{YSEQID}_{REF}.vcf.gz.tbi"
     conda:
         "get_sample_snps"
     log:
@@ -127,11 +139,14 @@ rule extract_ancestral_SNPS:
         tabix {output.DERIVED_VCF} >> {log} 2>&1
         """
 
-rule extract_derived_SNPS:
+rule extract_ancestral_SNPS:
     input:
-        CLEANED_VCF =   results_prefix  / "snp_calling" / "chrY_cleaned_{YSEQID}_{REF}.vcf.gz"
+        CLEANED_VCF =   results_prefix  / "snp_calling" / "chrY_cleaned_{YSEQID}_{REF}.vcf.gz",
+        VCF_TBI =       results_prefix  / "snp_calling" / "chrY_cleaned_{YSEQID}_{REF}.vcf.gz.tbi"
+
     output:
-        ANCESTRAL_VCF = results_prefix  / "snp_calling" / "chrY_ancestral_{YSEQID}_{REF}.vcf.gz"
+        ANCESTRAL_VCF = results_prefix  / "snp_calling" / "chrY_ancestral_{YSEQID}_{REF}.vcf.gz",
+        VCF_TBI =       results_prefix  / "snp_calling" / "chrY_ancestral_{YSEQID}_{REF}.vcf.gz.tbi"
     conda:
         "get_sample_snps"
     log:
@@ -150,9 +165,10 @@ rule extract_derived_SNPS:
 
 rule get_novel_SNPS:
     input:
-        CALLED_VCF =    results_prefix  / "snp_calling" /"chrY_called_{YSEQID}_{REF}.vcf.gz",
+        CALLED_VCF =    results_prefix  / "snp_calling" / "chrY_called_{YSEQID}_{REF}.vcf.gz",
+        VCF_TBI =       results_prefix  / "snp_calling" / "chrY_called_{YSEQID}_{REF}.vcf.gz.tbi"
     output:
-        NOVEL_VCF =     temp(results_prefix  / "snp_calling" / "chrY_novel_SNPs_{YSEQID}_{REF}.gz"),
+        NOVEL_VCF =     results_prefix  / "snp_calling" / "chrY_novel_SNPs_{YSEQID}_{REF}.vcf.gz",
         NOVEL_VCF_TSV =     results_prefix  / "snp_calling" / "chrY_novel_SNPs_{YSEQID}_{REF}.vcf.tsv"
     conda:
         "get_sample_snps"
@@ -168,6 +184,8 @@ rule get_novel_SNPS:
         tabix {output.NOVEL_VCF} >> {log} 2>&1
         (zcat {output.NOVEL_VCF} | grep -v "##" >{output.NOVEL_VCF_TSV} ) >> {log} 2>&1
         """
+
+
 rule confirm_novel_SNPS:
     input:
         NOVEL_VCF_TSV =     results_prefix  / "snp_calling" / "chrY_novel_SNPs_{YSEQID}_{REF}.vcf.tsv",
@@ -183,12 +201,12 @@ rule confirm_novel_SNPS:
     benchmark:
         results_prefix / "snp_calling" / "benchmark" / "{YSEQID}_{REF}_confirm_novel_snps.benchmark"
     threads:
-        workflow.cores  # Reserve all cores because the script allocates them dynamically
+        workflow.cores  
     group:
         "get_sample_snps"
     shell:
         """
-        (python3 workflow/scripts/script_templates/identityResolutionTemplateCreator.py -batch {input.NOVEL_VCF_TSV} {output.NOVEL_TSV} {input.REFSEQ} {output.NOVEL_PASSING_OUT}) > {log} 2>&1
+        (python3 workflow/scripts/identityResolutionTemplateCreator.py -batch {input.NOVEL_VCF_TSV} {output.NOVEL_TSV} {input.REFSEQ} {output.NOVEL_PASSING_OUT}) > {log} 2>&1
         """
 rule indel_calling:
     input:

@@ -6,8 +6,7 @@ rule create_easy_tview:
         results_prefix / "mapping" / "tview_{YSEQID}_{REF}.sh"
     conda:
         "bam_process"
-    #log:
-    #    results_prefix / "{YSEQID}_{REF}_create_tview.log"
+
     benchmark:
         results_prefix / "mapping" / "benchmark" / "{YSEQID}_{REF}_create_tview.benchmark"
     shell:

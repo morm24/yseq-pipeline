@@ -46,7 +46,7 @@ rule check_HG:
         
     shell:
         """
-        (python3 workflow/scripts/script_templates/cladeFinder.py {input.YFULLTREE} {input.POSITIVE_TXT} {input.NEGATIVE_TXT} {output[0]}) >> {log} 2>&1
+        (python3 workflow/scripts/cladeFinder.py {input.YFULLTREE} {input.POSITIVE_TXT} {input.NEGATIVE_TXT} {output[0]}) >> {log} 2>&1
         """
 
 rule save_HG:
@@ -87,6 +87,7 @@ rule get_equivalent_and_downstream_SNPS:
         POSITIVES_TXT = results_prefix / "cladefinder" / "{YSEQID}_{REF}_positives.txt",
         NEGATIVES_TXT = results_prefix / "cladefinder" / "{YSEQID}_{REF}_negatives.txt",
         CLEANED_VCF =   results_prefix / "snp_calling" / "chrY_cleaned_{YSEQID}_{REF}.vcf.gz",
+        CLEANED_VCF_TBI =   results_prefix / "snp_calling" / "chrY_cleaned_{YSEQID}_{REF}.vcf.gz.tbi",
         IDXSTATS =      results_prefix / "mapping" / "{YSEQID}_bwa-mem_{REF}_sorted.bam.idxstats.tsv",
         HAPLO_GROUP =   results_prefix / "cladefinder" / "{YSEQID}_{REF}haploGroup"  
 
@@ -103,7 +104,7 @@ rule get_equivalent_and_downstream_SNPS:
     shell:
         """
         YFULLHG=$(head -n 1 {input.HAPLO_GROUP})
-        python3 workflow/scripts/script_templates/getEquivalentAndDownstreamSNPs.py {input.YFULLTREE} "$YFULLHG" {input.CLEANED_VCF} {input.POSITIVES_TXT} {input.NEGATIVES_TXT} {output.PHYLOEQ_SNPS} {output.DOWNSTR_SNPS} {input.IDXSTATS} > {log} 2>&1
+        python3 workflow/scripts/getEquivalentAndDownstreamSNPs.py {input.YFULLTREE} "$YFULLHG" {input.CLEANED_VCF} {input.POSITIVES_TXT} {input.NEGATIVES_TXT} {output.PHYLOEQ_SNPS} {output.DOWNSTR_SNPS} {input.IDXSTATS} > {log} 2>&1
 
         """
     

@@ -1,3 +1,4 @@
+#index teh reference fasta File with minimap2
 rule index_refseq_minimap2: 
     input:
         REFSEQ = ref_prefix / "{REF}/{REF}.fa"
@@ -14,15 +15,13 @@ rule index_refseq_minimap2:
         minimap2 {input.REFSEQ} -d {output.INDEX} > {log} 2>&1
         """
 
-
+#map the Sample reads to the reference fasta file with minimap2
 rule map_minimap2:
     input:
         READS_1 = sample_prefix / "{YSEQID}_R1.fastq.gz",
         READS_2 = sample_prefix / "{YSEQID}_R2.fastq.gz",
-        #
         INDEX  = ref_prefix / "{REF}/{REF}.fa.mmi",
         REFSEQ = ref_prefix / "{REF}/{REF}.fa"
-        #"./resources/refseq/{REF}/{REF}.fa"
     output: 
         BAM = temp(results_prefix / "mapping" / "{YSEQID}_minimap2_{REF}.bam")
     conda:
@@ -32,7 +31,7 @@ rule map_minimap2:
     benchmark:
         results_prefix / "mapping" / "benchmark" / "{YSEQID}_minimap2_{REF}.benchmark"
     params:
-        "-a -x sr -t " if (config["READS"] == "short") else "-ax map-ont -t" #if (config["READS"] == "nanopore") "-ax map-ont -t" else "-at"#-t has to be last!
+        "-a -x sr -t " if (config["READS"] == "short") else "-ax map-ont -t" 
     threads: workflow.cores
     shell:
         """
@@ -40,7 +39,7 @@ rule map_minimap2:
         samtools view -@ {threads} -b -t {input.REFSEQ} -o {output.BAM} - ) > {log} 2>&1
         """
 
-
+#index the reference fasta file with bwa
 rule index_refseq_bwa:
     input:
         REFSEQ = ref_prefix / "{REF}/{REF}.fa"
@@ -72,7 +71,6 @@ rule map_bwa:
         ANN = ref_prefix / "{REF}/{REF}.fa.ann",
         PAC = ref_prefix / "{REF}/{REF}.fa.pac",
         SA  = ref_prefix / "{REF}/{REF}.fa.sa"
-        #"./resources/refseq/{REF}/{REF}.fa"
     output: 
         BAM = temp(results_prefix / "mapping" / "{YSEQID}_bwa-mem_{REF}.bam")
     conda:
@@ -89,7 +87,7 @@ rule map_bwa:
         (bwa mem {params.BWA} {threads} {input.REFSEQ} {input.READS_1} {input.READS_2} | 
         samtools view -@ {threads} -b -t {input.REFSEQ} -o {output.BAM} - ) > {log} 2>&1
         """
-
+#sort and index the BAM file (mapped reads) for faster processing in future steps
 rule sort_and_index:
     input:
         BAM = results_prefix / "mapping" / "{YSEQID}_bwa-mem_{REF}.bam" if (config["MAPPER"] == "bwa") else results_prefix / "{YSEQID}_minimap2_{REF}.bam" #elif (config["MAPPER"] == "minimap2") results_prefix / "{YSEQID}_minimap2_{REF}.bam"
@@ -104,19 +102,16 @@ rule sort_and_index:
     benchmark:
         results_prefix / "mapping" / "benchmark" / "{YSEQID}_{REF}_samtools_sort.benchmark"
     params:
-        #how do I pass the snakemake num threads to the tool?
-        #NUM_THREADS = "-@ 4",
-        #SORTDIR = "-T /usr/local/geospiza/var/tmp/"
-        SORTDIR = "-T resources/tmp/"
-        #OUTPUT =  "-o .SORTED_BAM}"
+        SORTDIR = "-T resources/tmp/sorted"
     threads: workflow.cores * 1
     shell:
         """
-        samtools sort -@ {threads} {params.SORTDIR}sorted -o {output.SORTED_BAM} {input.BAM}    > {log} 2>&1
+        samtools sort -@ {threads} {params.SORTDIR} -o {output.SORTED_BAM} {input.BAM}    > {log} 2>&1
 	    samtools index -@ {threads} {output.SORTED_BAM}                                         >> {log} 2>&1
 	    samtools idxstats {output.SORTED_BAM} | tee {output.IDXSTATS}                           >> {log} 2>&1
         """
 
+#Get Mapping statistics of the bam file for quality control
 #swap the code with bamstaistics or sth. like that
 rule get_mapping_statistics:
     input:
@@ -137,14 +132,14 @@ rule get_mapping_statistics:
         """
         bamstats -u -i {input.BAM} -o {output.STATS} > {log} 2>&1
         """
-        
-#chromosome = ["chrY", "chrM"]
+
+#extract the mtDNA and Y chromosome reads from the BAM file for valifating the results outside the pipeline   
+chromosome = ["chrY", "rCRS_chrM"]
 rule seperate_BAM:
     input:
         BAM = results_prefix / "mapping" / "{YSEQID}_bwa-mem_{REF}_sorted.bam"
         
     output:
-        #CHR_BAM = expand(results_prefix / "mapping" / "{{YSEQID}}_bwa-mem_{{REF}}_{chr}.bam", chr=chromosome)
         CHR_BAM = results_prefix / "mapping" / "{YSEQID}_bwa-mem_{REF}_{chr}.bam"
 
     conda:
@@ -155,8 +150,10 @@ rule seperate_BAM:
         results_prefix / "mapping" / "benchmark" / "{YSEQID}_bwa-mem_{REF}_{chr}.benchmark"
     threads: 
         workflow.cores * 1
+    params:
+        chr = expand("{chr}", chr=chromosome)
     shell:
         """
-        (samtools view -@ {threads} -b -o {output.CHR_BAM} {input.BAM} {wildcards.chr}) > {log} 2>&1
+        (samtools view -@ {threads} -b -o {output.CHR_BAM} {input.BAM} {params.chr}) > {log} 2>&1
         samtools index {output.CHR_BAM} >> {log} 2>&1
         """
