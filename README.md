@@ -10,6 +10,8 @@ The YSEQ Y-DNA Analysis Pipeline is designed to process paired ended fastq.gz fi
 - Python 3.6+
 - Snakemake
 - conda
+- pandas
+- Path
 
 - bcftools
 - samtools
@@ -45,7 +47,10 @@ The YSEQ Y-DNA Analysis Pipeline is designed to process paired ended fastq.gz fi
     ```sh
     conda install -n base -c conda-forge mamba
     ```
-
+5. **Install pandas & Path**
+    '''sh
+    pip install Pandas Path
+    '''
 ## Usage
 1. **Prepare the input files:**
     ### First Methode
