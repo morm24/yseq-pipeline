@@ -35,8 +35,7 @@ rule get_all_SNPs_Sample:
         RAW_VCF =       temp(results_prefix  / "snp_calling" / "chrY_raw_{YSEQID}_{REF}.vcf.gz")
     conda:
         "../envs/get_sample_snps.yaml"
-    group:
-        "get_sample_snps"
+
     log:
         results_prefix / "snp_calling" / "logs" / "{YSEQID}_{REF}_bcf_mpileup.log"
     benchmark:
@@ -65,8 +64,7 @@ rule merge_SNPS_HARRY_ALIEN_SAMPLE:
         results_prefix / "snp_calling" / "logs" / "{YSEQID}_{REF}_bcf_merge.log"
     benchmark:
         results_prefix / "snp_calling" / "benchmark" / "{YSEQID}_{REF}_bcf_merge.benchmark"
-    group:
-        "get_sample_snps"
+
     shell:
         """
         (bcftools merge -m both -O z {input.SNPS} {input.RAW_VCF} > {output.MERGED_VCF}) > {log} 2>&1
@@ -86,8 +84,7 @@ rule get_differences_HARRY_ALIEN_SAMPLE:
         results_prefix / "snp_calling" / "logs" / "{YSEQID}_{REF}_bcf_call.log"
     benchmark:
         results_prefix / "snp_calling" / "benchmark" / "{YSEQID}_{REF}_bcf_call.benchmark"
-    group:
-        "get_sample_snps"
+
     shell:
         """
 	    (bcftools call -O z -m -P 0 {input.MERGED_VCF} > {output.CALLED_VCF} ) > {log} 2>&1
@@ -108,8 +105,7 @@ rule rm_HARRY_ALIEN_from_VCF:
         results_prefix / "snp_calling" / "logs" / "{YSEQID}_{REF}_bcf__view_rm_HARRY_ALIEN.log"
     benchmark:
         results_prefix / "snp_calling" / "benchmark" / "{YSEQID}_{REF}_bcf__view_rm_HARRY_ALIEN.benchmark"
-    group:
-        "get_sample_snps"
+
     shell:
         """
 	    (bcftools view -O z -k -s ^HARRY,ALIEN {input.CALLED_VCF} > {output.CLEANED_VCF}) > {log} 2>&1
@@ -129,8 +125,7 @@ rule extract_derived_SNPS:
        results_prefix / "snp_calling" / "logs" / "{YSEQID}_{REF}_bcf_filter_ancestral.log"
     benchmark:
         results_prefix / "snp_calling" / "benchmark" / "{YSEQID}_{REF}_bcf_filter_ancestral.benchmark"
-    group:
-        "get_sample_snps"
+
     threads:
         workflow.cores * 0.5
     shell:
@@ -153,8 +148,7 @@ rule extract_ancestral_SNPS:
         results_prefix / "snp_calling" / "logs" / "{YSEQID}_{REF}_bcf_filter_derived.log"
     benchmark:
         results_prefix / "snp_calling" / "benchmark" / "{YSEQID}_{REF}_bcf_filter_derived.benchmark"
-    group:
-        "get_sample_snps"
+
     threads:
         workflow.cores * 0.5
     shell:
@@ -176,8 +170,7 @@ rule get_novel_SNPS:
         results_prefix / "snp_calling" / "logs" / "{YSEQID}_{REF}_bcf_filter_novel.log"
     benchmark:
         results_prefix / "snp_calling" / "benchmark" / "{YSEQID}_{REF}_bcf_filter_novel.benchmark"
-    group:
-        "get_sample_snps"
+
     shell:
         """
         (bcftools filter -i 'TYPE="snp" && QUAL>=30 && GT=="1/1" && DP4[2] + DP4[3] >=2 && (DP4[0] + DP4[1]) / DP < 0.1' {input.CALLED_VCF} | bcftools view -n -O z -s ^HARRY,ALIEN > {output.NOVEL_VCF})   > {log} 2>&1
@@ -202,8 +195,6 @@ rule confirm_novel_SNPS:
         results_prefix / "snp_calling" / "benchmark" / "{YSEQID}_{REF}_confirm_novel_snps.benchmark"
     threads:
         workflow.cores  
-    group:
-        "get_sample_snps"
     shell:
         """
         (python3 workflow/scripts/identityResolutionTemplateCreator.py -batch {input.NOVEL_VCF_TSV} {output.NOVEL_TSV} {input.REFSEQ} {output.NOVEL_PASSING_OUT}) > {log} 2>&1
@@ -219,8 +210,7 @@ rule indel_calling:
         results_prefix / "snp_calling" / "logs" / "{YSEQID}_{REF}_bcf_filter_indels.log"
     benchmark:
         results_prefix / "snp_calling" / "benchmark" / "{YSEQID}_{REF}_bcf_filter_indels.benchmark"
-    group:
-        "get_sample_snps"
+
     shell:
         """
         (bcftools filter -i 'TYPE="indel" && QUAL>=30 && GT=="1/1" && DP4[2] + DP4[3] >=2 && (DP4[0] + DP4[1]) / DP < 0.1' {input.CALLED_VCF} | bcftools view -n -O z -s ^HARRY,ALIEN > {output.INDEL_VCF})  > {log} 2>&1

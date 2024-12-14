@@ -109,7 +109,7 @@ def createFastQ(seq, fastQFilename):
     w.close()
     
 def oneOff(referenceFile, refIndexFile, position, refseq):
-    bedFile = "bed.bed"+str(position)
+    bedFile = str(bedPath) + "bed.bed"+str(position)
     fastQFile = "fastq.fastq"+str(position)
     
     createBED(position, bedFile,refseq)
@@ -124,7 +124,7 @@ def testPAF(refIndexFile, position):
     return parsePAF(position, pafOutputFile)
 
 def blatOneOff(referenceFile, position, refseq):
-    bedFile = "bed.bed"
+    bedFile = str(bedPath) + "bed.bed"
     
     createBED(position, bedFile, refseq)
     blatFile = str(position) + "_BLAT"
@@ -184,7 +184,7 @@ def lineProcessing(line, w, referenceFile, refIndexFile, refseq, output, passing
         checkedRange = oneOff(referenceFile, refIndexFile, intpos, refseq)
 
         os.remove("fastq.fastq"+str(pos))
-        os.remove("bed.bed"+str(pos))
+        os.remove(str(bedPath) + "bed.bed"+str(pos))
         os.remove("alignment.paf"+str(pos))
 
     if checkedRange == "ok":
@@ -270,6 +270,7 @@ if len(sys.argv) > 3:
         if len(sys.argv) > 5:
             novelPassingOut = sys.argv[5] 
         analyzeNovelSNPs(vcfFile, outputFile, referenceFile)  
+        bedPath = "temp/"
    
     else:
         if mode == "-blat":

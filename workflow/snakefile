@@ -34,7 +34,7 @@ rule all:
     input:
         expand(results_prefix / "mapping" / "tview_{YSEQID}_{REF}.sh",               zip, YSEQID=yseqids, REF=refs), # pick row-wise 
         expand(results_prefix / "mapping" / "{YSEQID}_bwa-mem_{REF}_chrY.bam",       zip, YSEQID=yseqids, REF=refs),
-        expand(results_prefix / "mapping" / "{YSEQID}_bwa-mem_{REF}_rCRS_chrM.bam",  zip, YSEQID=yseqids, REF=refs),
+        expand(results_prefix / "mapping" / "{YSEQID}_bwa-mem_{REF}_chrM.bam",  zip, YSEQID=yseqids, REF=refs),
         expand(results_prefix / "mapping" / "{YSEQID}_{REF}_mapping_stats.txt",      zip, YSEQID=yseqids, REF=refs),
         expand(results_prefix / "snp_calling" / "chrY_INDELs_{YSEQID}_{REF}.gz",         zip, YSEQID=yseqids, REF=refs),
         expand(results_prefix / "cladefinder" / "{YSEQID}_{REF}_PHYLOEQ_SNPS.tsv",       zip, YSEQID=yseqids, REF=refs),

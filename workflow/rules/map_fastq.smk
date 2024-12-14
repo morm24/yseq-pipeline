@@ -134,7 +134,6 @@ rule get_mapping_statistics:
         """
 
 #extract the mtDNA and Y chromosome reads from the BAM file for valifating the results outside the pipeline   
-chromosome = ["chrY", "rCRS_chrM"]
 rule seperate_BAM:
     input:
         BAM = results_prefix / "mapping" / "{YSEQID}_bwa-mem_{REF}_sorted.bam"
@@ -150,10 +149,8 @@ rule seperate_BAM:
         results_prefix / "mapping" / "benchmark" / "{YSEQID}_bwa-mem_{REF}_{chr}.benchmark"
     threads: 
         workflow.cores * 1
-    params:
-        chr = expand("{chr}", chr=chromosome)
     shell:
         """
-        (samtools view -@ {threads} -b -o {output.CHR_BAM} {input.BAM} {params.chr}) > {log} 2>&1
+        (samtools view -@ {threads} -b -o {output.CHR_BAM} {input.BAM} {wildcards.chr}) > {log} 2>&1
         samtools index {output.CHR_BAM} >> {log} 2>&1
         """
