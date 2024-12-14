@@ -4,7 +4,7 @@ rule download_snps:
         SNPS =          results_prefix  / "snp_calling" / "snps_{REF}.vcf.gz",
         SNPS_TBI =      results_prefix  / "snp_calling" / "snps_{REF}.vcf.gz.tbi"
     conda:
-        "get_sample_snps.yaml"
+        "../envs/get_sample_snps.yaml"
     log:
         results_prefix / "snp_calling" / "logs" / "load_snps_{REF}.log"
     benchmark:
@@ -34,7 +34,9 @@ rule get_all_SNPs_Sample:
         VCF_TBI =       temp(results_prefix  / "snp_calling" / "chrY_raw_{YSEQID}_{REF}.vcf.gz.tbi"),
         RAW_VCF =       temp(results_prefix  / "snp_calling" / "chrY_raw_{YSEQID}_{REF}.vcf.gz")
     conda:
-        "get_sample_snps.yaml"
+        "../envs/get_sample_snps.yaml"
+    group:
+        "get_sample_snps"
     log:
         results_prefix / "snp_calling" / "logs" / "{YSEQID}_{REF}_bcf_mpileup.log"
     benchmark:
@@ -58,11 +60,13 @@ rule merge_SNPS_HARRY_ALIEN_SAMPLE:
         MERGED_VCF =    temp(results_prefix  / "snp_calling" / "chrY_merged_{YSEQID}_{REF}.vcf.gz"),
         VCF_TBI =       temp(results_prefix  / "snp_calling" / "chrY_merged_{YSEQID}_{REF}.vcf.gz.tbi")
     conda:
-        "get_sample_snps.yaml"
+        "../envs/get_sample_snps.yaml"
     log:
         results_prefix / "snp_calling" / "logs" / "{YSEQID}_{REF}_bcf_merge.log"
     benchmark:
         results_prefix / "snp_calling" / "benchmark" / "{YSEQID}_{REF}_bcf_merge.benchmark"
+    group:
+        "get_sample_snps"
     shell:
         """
         (bcftools merge -m both -O z {input.SNPS} {input.RAW_VCF} > {output.MERGED_VCF}) > {log} 2>&1
@@ -77,7 +81,7 @@ rule get_differences_HARRY_ALIEN_SAMPLE:
         CALLED_VCF =    results_prefix  / "snp_calling" / "chrY_called_{YSEQID}_{REF}.vcf.gz",
         VCF_TBI =       temp(results_prefix  / "snp_calling" / "chrY_called_{YSEQID}_{REF}.vcf.gz.tbi")
     conda:
-        "get_sample_snps.yaml"
+        "../envs/get_sample_snps.yaml"
     log:
         results_prefix / "snp_calling" / "logs" / "{YSEQID}_{REF}_bcf_call.log"
     benchmark:
@@ -99,7 +103,7 @@ rule rm_HARRY_ALIEN_from_VCF:
         CLEANED_VCF =   results_prefix  / "snp_calling" / "chrY_cleaned_{YSEQID}_{REF}.vcf.gz",
         VCF_TBI =       temp(results_prefix  / "snp_calling" / "chrY_cleaned_{YSEQID}_{REF}.vcf.gz.tbi")
     conda:
-        "get_sample_snps.yaml"
+        "../envs/get_sample_snps.yaml"
     log:
         results_prefix / "snp_calling" / "logs" / "{YSEQID}_{REF}_bcf__view_rm_HARRY_ALIEN.log"
     benchmark:
@@ -120,7 +124,7 @@ rule extract_derived_SNPS:
         DERIVED_VCF =   results_prefix  / "snp_calling" / "chrY_derived_{YSEQID}_{REF}.vcf.gz",
         VCF_TBI =       results_prefix  / "snp_calling" / "chrY_derived_{YSEQID}_{REF}.vcf.gz.tbi"
     conda:
-        "get_sample_snps.yaml"
+        "../envs/get_sample_snps.yaml"
     log:
        results_prefix / "snp_calling" / "logs" / "{YSEQID}_{REF}_bcf_filter_ancestral.log"
     benchmark:
@@ -144,7 +148,7 @@ rule extract_ancestral_SNPS:
         ANCESTRAL_VCF = results_prefix  / "snp_calling" / "chrY_ancestral_{YSEQID}_{REF}.vcf.gz",
         VCF_TBI =       results_prefix  / "snp_calling" / "chrY_ancestral_{YSEQID}_{REF}.vcf.gz.tbi"
     conda:
-        "get_sample_snps.yaml"
+        "../envs/get_sample_snps.yaml"
     log:
         results_prefix / "snp_calling" / "logs" / "{YSEQID}_{REF}_bcf_filter_derived.log"
     benchmark:
@@ -167,7 +171,7 @@ rule get_novel_SNPS:
         NOVEL_VCF =     results_prefix  / "snp_calling" / "chrY_novel_SNPs_{YSEQID}_{REF}.vcf.gz",
         NOVEL_VCF_TSV =     results_prefix  / "snp_calling" / "chrY_novel_SNPs_{YSEQID}_{REF}.vcf.tsv"
     conda:
-        "get_sample_snps.yaml"
+        "../envs/get_sample_snps.yaml"
     log:
         results_prefix / "snp_calling" / "logs" / "{YSEQID}_{REF}_bcf_filter_novel.log"
     benchmark:
@@ -191,7 +195,7 @@ rule confirm_novel_SNPS:
         NOVEL_TSV =     results_prefix  / "snp_calling" / "chrY_novel_SNPs_{YSEQID}_{REF}.tsv",
         NOVEL_PASSING_OUT =     results_prefix / "snp_calling" / "novelPassingPositionsForBLATCheck.txt"
     conda:
-        "get_sample_snps.yaml"
+        "../envs/get_sample_snps.yaml"
     log:
         results_prefix / "snp_calling" / "logs" / "{YSEQID}_{REF}_confirm_novel_snps.log"
     benchmark:
@@ -202,7 +206,7 @@ rule confirm_novel_SNPS:
         "get_sample_snps"
     shell:
         """
-        (python workflow/scripts/identityResolutionTemplateCreator.py -batch {input.NOVEL_VCF_TSV} {output.NOVEL_TSV} {input.REFSEQ} {output.NOVEL_PASSING_OUT}) > {log} 2>&1
+        (python3 workflow/scripts/identityResolutionTemplateCreator.py -batch {input.NOVEL_VCF_TSV} {output.NOVEL_TSV} {input.REFSEQ} {output.NOVEL_PASSING_OUT}) > {log} 2>&1
         """
 rule indel_calling:
     input:
@@ -210,7 +214,7 @@ rule indel_calling:
     output:
         INDEL_VCF =     results_prefix  / "snp_calling" / "chrY_INDELs_{YSEQID}_{REF}.gz"
     conda:
-        "get_sample_snps.yaml"
+        "../envs/get_sample_snps.yaml"
     log:
         results_prefix / "snp_calling" / "logs" / "{YSEQID}_{REF}_bcf_filter_indels.log"
     benchmark:

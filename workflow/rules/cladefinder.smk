@@ -4,7 +4,7 @@ rule preprocessing_cladefinder_derived:
     output:
         POSITIVE_TXT =  results_prefix / "cladefinder" / "{YSEQID}_{REF}_positives.txt",
     conda:
-        "bam_process.yaml"
+        "../envs/bam_process.yaml"
     log: 
         results_prefix / "cladefinder" /  "cladefinder.txt.log"
     benchmark:
@@ -20,7 +20,7 @@ rule preprocessing_cladefinder_ancestral:
     output:
         NEGATIVE_TXT =  results_prefix / "cladefinder" / "{YSEQID}_{REF}_negatives.txt"
     conda:
-        "bam_process.yaml"
+        "../envs/bam_process.yaml"
     log: 
         results_prefix / "cladefinder" / "cladefinder.txt.log"
     benchmark:
@@ -38,7 +38,7 @@ rule check_HG:
     output:
         results_prefix / "cladefinder" / "{YSEQID}_{REF}cladeFinderOutput.csv"
     conda:
-        "bam_process.yaml"
+        "../envs/bam_process.yaml"
     log: 
         results_prefix / "cladefinder" / "cladefinder.txt.log"
     benchmark:
@@ -96,7 +96,7 @@ rule get_equivalent_and_downstream_SNPS:
         PHYLOEQ_SNPS = results_prefix / "cladefinder" / "{YSEQID}_{REF}_PHYLOEQ_SNPS.tsv",
         DOWNSTR_SNPS = results_prefix / "cladefinder" / "{YSEQID}_{REF}_DOWNSTR_SNPS.tsv"
     conda:
-        "bam_process.yaml" 
+        "../envs/bam_process.yaml" 
     log: 
         results_prefix / "cladefinder" / "getEQAndDownSNPs.txt.log"
     benchmark:
