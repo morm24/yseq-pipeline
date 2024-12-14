@@ -38,7 +38,7 @@ rule get_mtdna_differences_process:
         results_prefix / "mtdna" / "benchmark" / "{YSEQID}_{REF}_mtDNA_differences_process.benchmark"
     shell:
         """
-        python3 workflow/scripts/getMTDNADifferences.py -process {input.VCF} resources/haplogrep/haplogrep-2.1.25.jar {output.MTDNA_SNPS} {output.HAPLO_TSV} > {log} 2>&1
+        python workflow/scripts/getMTDNADifferences.py -process {input.VCF} resources/haplogrep/haplogrep-2.1.25.jar {output.MTDNA_SNPS} {output.HAPLO_TSV} > {log} 2>&1
         
         """ 
 rule get_mtdna_differences_update: 
@@ -57,7 +57,7 @@ rule get_mtdna_differences_update:
     shell:
         """
         mkdir -p {output.TEST_OUTPUT} > {log} 2>&1
-        (python3 workflow/scripts/getMTDNADifferences.py -update {output.TEST_OUTPUT}  {output.TEST_OUTPUT}.out {input.MT_VCF} {input.PHYLOEQ_SNPS} {input.DOWNSTR_SNPS} "The differences to the rCRS are" "phylo-equivalent SNPs to" "known downstream SNPs to" "novel SNPs found in sample"  ) >> {log} 2>&1
+        (python workflow/scripts/getMTDNADifferences.py -update {output.TEST_OUTPUT}  {output.TEST_OUTPUT}.out {input.MT_VCF} {input.PHYLOEQ_SNPS} {input.DOWNSTR_SNPS} "The differences to the rCRS are" "phylo-equivalent SNPs to" "known downstream SNPs to" "novel SNPs found in sample"  ) >> {log} 2>&1
         """
 rule get_mtDifferences_addAlleles:
     input:
@@ -76,7 +76,7 @@ rule get_mtDifferences_addAlleles:
         results_prefix / "mtdna" / "benchmark" / "{YSEQID}_{REF}_mtDNA_differences_addAlleles.benchmark"
     shell:
         """
-        (python3 workflow/scripts/getMTDNADifferences.py -addAlleles {output.ALLELES_TSV} {input.MTDNA_SNPS} {wildcards.YSEQID} {input.MT_VCF} {input.PHYLOEQ_SNPS} {input.DOWNSTR_SNPS} chrY_{wildcards.YSEQID}_{wildcards.REF}.vcf.gz) > {log} 2>&1
+        (python workflow/scripts/getMTDNADifferences.py -addAlleles {output.ALLELES_TSV} {input.MTDNA_SNPS} {wildcards.YSEQID} {input.MT_VCF} {input.PHYLOEQ_SNPS} {input.DOWNSTR_SNPS} chrY_{wildcards.YSEQID}_{wildcards.REF}.vcf.gz) > {log} 2>&1
         """
 
 rule get_mtDifferences_create_update_script:
@@ -97,7 +97,7 @@ rule get_mtDifferences_create_update_script:
         results_prefix / "mtdna" / "benchmark" / "{YSEQID}_{REF}_mtDNA_differences_create_update_script.benchmark"
     shell:
         """
-        (python3 workflow/scripts/getMTDNADifferences.py -createUpdateScript \
+        (python workflow/scripts/getMTDNADifferences.py -createUpdateScript \
         addAlleles.tsv {input.TEST_OUTPUT} {input.TEST_OUTPUT}.out {wildcards.YSEQID} {input.MT_VCF} \
         {input.CHRY_VCF} {input.MTDNA_SNPS} {input.PHYLOEQ_SNPS} {input.DOWNSTR_SNPS} \
         "The differences to the rCRS are" "phylo-equivalent SNPs to" "known downstream SNPs to" "novel SNPs found in sample" {output.UPDATE_SCRIPT}) > {log} 2>&1

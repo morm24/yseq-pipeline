@@ -46,7 +46,7 @@ rule check_HG:
         
     shell:
         """
-        (python3 workflow/scripts/cladeFinder.py {input.YFULLTREE} {input.POSITIVE_TXT} {input.NEGATIVE_TXT} {output[0]}) >> {log} 2>&1
+        (python workflow/scripts/cladeFinder.py {input.YFULLTREE} {input.POSITIVE_TXT} {input.NEGATIVE_TXT} {output[0]}) >> {log} 2>&1
         """
 
 rule save_HG:
@@ -104,7 +104,7 @@ rule get_equivalent_and_downstream_SNPS:
     shell:
         """
         YFULLHG=$(head -n 1 {input.HAPLO_GROUP})
-        python3 workflow/scripts/getEquivalentAndDownstreamSNPs.py {input.YFULLTREE} "$YFULLHG" {input.CLEANED_VCF} {input.POSITIVES_TXT} {input.NEGATIVES_TXT} {output.PHYLOEQ_SNPS} {output.DOWNSTR_SNPS} {input.IDXSTATS} > {log} 2>&1
+        python workflow/scripts/getEquivalentAndDownstreamSNPs.py {input.YFULLTREE} "$YFULLHG" {input.CLEANED_VCF} {input.POSITIVES_TXT} {input.NEGATIVES_TXT} {output.PHYLOEQ_SNPS} {output.DOWNSTR_SNPS} {input.IDXSTATS} > {log} 2>&1
 
         """
     

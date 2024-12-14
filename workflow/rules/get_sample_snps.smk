@@ -206,7 +206,7 @@ rule confirm_novel_SNPS:
         "get_sample_snps"
     shell:
         """
-        (python3 workflow/scripts/identityResolutionTemplateCreator.py -batch {input.NOVEL_VCF_TSV} {output.NOVEL_TSV} {input.REFSEQ} {output.NOVEL_PASSING_OUT}) > {log} 2>&1
+        (python workflow/scripts/identityResolutionTemplateCreator.py -batch {input.NOVEL_VCF_TSV} {output.NOVEL_TSV} {input.REFSEQ} {output.NOVEL_PASSING_OUT}) > {log} 2>&1
         """
 rule indel_calling:
     input:

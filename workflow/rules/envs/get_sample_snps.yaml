@@ -9,4 +9,4 @@ dependencies:
   - tabix=1.11
   - wget=1.21.4
   - psutil=5.9.4
-  - tee>=9.0
+  - coreutils

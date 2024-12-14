@@ -1,7 +1,6 @@
 .gitignore
 #reference
 resources/refseq/**/*.fa*
-resources/refseq/**/*.benchmark
 #!resources/refseq/hg38.fa
 #!resources/refseq/hs1.fa
 #resources
@@ -12,6 +11,7 @@ log/*
 workflow/rules/empty
 .snakemake/
 *.log
+*.benchmark
 
 questions.txt
 temp_trash/*
