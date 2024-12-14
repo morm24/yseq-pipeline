@@ -8,7 +8,7 @@ rule mt_consensus:
         CONSENSUS = results_prefix / "mtdna" / "{YSEQID}_{REF}_mtDNA.fasta"
 
     conda:
-        "bam_process"
+        "bam_process.yaml"
     log:
         results_prefix / "mtdna" / "log" / "{YSEQID}_{REF}_mt_consensus.log"
     benchmark:
@@ -31,7 +31,7 @@ rule get_mtdna_differences_process:
         MTDNA_SNPS  =   results_prefix / "mtdna" / "{YSEQID}_{REF}_MTDNA_SNPS.tsv",
         HAPLO_TSV   =   results_prefix / "mtdna" / "{YSEQID}_{REF}_haplogrep.tsv"
     conda:
-        "bam_process"
+        "bam_process.yaml"
     log:
         results_prefix / "mtdna" / "log" / "{YSEQID}_{REF}_mtDNA_differences_process.log"
     benchmark:
@@ -49,7 +49,7 @@ rule get_mtdna_differences_update:
     output:
         TEST_OUTPUT =   results_prefix / "mtdna" / "{YSEQID}_{REF}_result_summary.txt"
     conda:
-        "bam_process"
+        "bam_process.yaml"
     log:
         results_prefix / "mtdna" / "{YSEQID}_{REF}_mtDNA_differences_update.log"
     benchmark:
@@ -69,7 +69,7 @@ rule get_mtDifferences_addAlleles:
         ALLELES_TSV = results_prefix / "cladefinder" / "{YSEQID}_{REF}_addAlleles.tsv"
         #ALLELES_TSV = "addAlleles.tsv"
     conda:
-        "bam_process"
+        "bam_process.yaml"
     log:
         results_prefix / "mtdna" / "log" / "{YSEQID}_{REF}_mtDNA_differences_addAlleles.log"
     benchmark:
@@ -90,7 +90,7 @@ rule get_mtDifferences_create_update_script:
     output:
         UPDATE_SCRIPT = results_prefix / "mtdna" / "{YSEQID}_{REF}_update.sh"
     conda:
-        "bam_process"
+        "bam_process.yaml"
     log:
         results_prefix / "mtdna" / "log" / "{YSEQID}_{REF}_mtDNA_differences_create_update_script.log"
     benchmark:
@@ -110,7 +110,7 @@ rule phenotyping:
     output:
 
     conda:
-        "bam_process"
+        "bam_process.yaml"
 
     shell:
         """

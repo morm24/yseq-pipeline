@@ -9,7 +9,7 @@ rule index_refseq_minimap2:
     benchmark:
         ref_prefix / "{REF}/{REF}_minimap2_index.benchmark"
     conda:
-        "envs/mapping.yaml"
+        "mapping.yaml"
     shell:
         """
         minimap2 {input.REFSEQ} -d {output.INDEX} > {log} 2>&1
@@ -25,7 +25,7 @@ rule map_minimap2:
     output: 
         BAM = temp(results_prefix / "mapping" / "{YSEQID}_minimap2_{REF}.bam")
     conda:
-        "envs/mapping.yaml"
+        "mapping.yaml"
     log:
         results_prefix / "mapping" / "logs" / "{YSEQID}_minimap2_{REF}.log"
     benchmark:
@@ -54,7 +54,7 @@ rule index_refseq_bwa:
     benchmark:
         ref_prefix / "{REF}/{REF}_bwa_index.benchmark"
     conda:
-        "envs/mapping.yaml"
+        "mapping.yaml"
     shell:
         """
         bwa index {input.REFSEQ} > {log} 2>&1
@@ -74,7 +74,7 @@ rule map_bwa:
     output: 
         BAM = temp(results_prefix / "mapping" / "{YSEQID}_bwa-mem_{REF}.bam")
     conda:
-        "envs/mapping.yaml"
+        "mapping.yaml"
     log:
         results_prefix / "mapping" / "logs" / "{YSEQID}_bwa-mem_{REF}.log"
     benchmark:
@@ -96,7 +96,7 @@ rule sort_and_index:
         BAI = results_prefix / "mapping" / "{YSEQID}_bwa-mem_{REF}_sorted.bam.bai",
         IDXSTATS = results_prefix / "mapping" / "{YSEQID}_bwa-mem_{REF}_sorted.bam.idxstats.tsv"
     conda:
-        "envs/mapping.yaml"
+        "mapping.yaml"
     log:
         results_prefix / "mapping" / "logs" / "{YSEQID}_{REF}_samtools_sort.log"
     benchmark:
@@ -121,7 +121,7 @@ rule get_mapping_statistics:
     output:
         STATS = results_prefix / "mapping" / "{YSEQID}_{REF}_mapping_stats.txt"
     conda:
-        "envs/mapping.yaml"
+        "mapping.yaml"
     log:
         results_prefix / "mapping" / "logs" / "{YSEQID}_{REF}_bamstats.log"
     benchmark:
@@ -143,7 +143,7 @@ rule seperate_BAM:
         CHR_BAM = results_prefix / "mapping" / "{YSEQID}_bwa-mem_{REF}_{chr}.bam"
 
     conda:
-        "envs/mapping.yaml"
+        "mapping.yaml"
     log:
         results_prefix / "mapping" / "logs" / "{YSEQID}_bwa-mem_{REF}_{chr}.log"
     benchmark:
