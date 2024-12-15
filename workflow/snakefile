@@ -29,6 +29,26 @@ log_prefix = Path(config["LOG_PATH"]).resolve()
 tmp_prefix =  Path(config["TMP_PATH"]).resolve()
 sample_prefix = Path(config["SAMPLE_PATH"]).resolve()  / "{YSEQID}"
 
+missing = []
+missing_bool = False
+for yid in set(yseqids):
+    file_prefix = expand(sample_prefix, YSEQID=yid)[0] + "/" + str(yid)
+    #print (file_prefix)
+    if not (Path(file_prefix + "_R1.fastq.gz").exists() or Path(file_prefix + "_R2.fastq.gz").exists()):
+        missing.append(str(yid) + " fastq.gz Files")
+        missing_bool = True
+for ref in set(refs):
+    file_prefix = (str(ref_prefix) + "/" + ref + "/" + ref)
+    #print (file_prefix)
+    if not (Path(file_prefix + ".fa").exists() or Path(file_prefix + ".fasta").exists()):
+        missing.append(ref + ".fa Fasta fles")
+        missing_bool = True
+if missing_bool:
+    print("Can't locate:")
+    for x in missing:
+        print(x) 
+    print("Did you copied the right files / filenames? \nAre symlinks broken?")
+    exit()
 
 rule all:
     input:
