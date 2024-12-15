@@ -3,7 +3,7 @@ rule index_refseq_minimap2:
     input:
         REFSEQ = ref_prefix / "{REF}/{REF}.fa"
     output:
-        INDEX = ref_prefix / "{REF}/{REF}.fa.mmi"
+        INDEX = protected(ref_prefix / "{REF}/{REF}.fa.mmi")
     log:
         ref_prefix / "{REF}/{REF}_minimap2_index.log"
     benchmark:
@@ -44,11 +44,11 @@ rule index_refseq_bwa:
     input:
         REFSEQ = ref_prefix / "{REF}/{REF}.fa"
     output:
-        BWT = ref_prefix / "{REF}/{REF}.fa.bwt",
-        AMB = ref_prefix / "{REF}/{REF}.fa.amb",
-        ANN = ref_prefix / "{REF}/{REF}.fa.ann",
-        PAC = ref_prefix / "{REF}/{REF}.fa.pac",
-        SA  = ref_prefix / "{REF}/{REF}.fa.sa"
+        BWT = protected(ref_prefix / "{REF}/{REF}.fa.bwt"),
+        AMB = protected(ref_prefix / "{REF}/{REF}.fa.amb"),
+        ANN = protected(ref_prefix / "{REF}/{REF}.fa.ann"),
+        PAC = protected(ref_prefix / "{REF}/{REF}.fa.pac"),
+        SA  = protected(ref_prefix / "{REF}/{REF}.fa.sa")
     log:
         ref_prefix / "{REF}/{REF}_bwa_index.log"
     benchmark:
