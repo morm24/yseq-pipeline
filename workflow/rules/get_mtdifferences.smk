@@ -104,15 +104,3 @@ rule get_mtDifferences_create_update_script:
         chmod a+x updateScript.sh >> {log} 2>&1
         """
     
-rule phenotyping:
-    input:
-
-    output:
-
-    conda:
-        "../envs/bam_process.yaml"
-
-    shell:
-        """
-        ./workflow/scripts/phenotyping_hg38_pipeline.sh
-        """
