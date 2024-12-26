@@ -14,6 +14,7 @@ rule preprocessing_cladefinder_derived:
 	    (bcftools query -f '%ID,' {input.DERIVED_VCF} | sed ':a;N;$!ba;s/\\n//g' | tee {output.POSITIVE_TXT}) >> {log} 2>&1
         """
 
+
 rule preprocessing_cladefinder_ancestral:
     input:
         ANCESTRAL_VCF = results_prefix  / "snp_calling" / "chrY_ancestral_{YSEQID}_{REF}.vcf.gz"
@@ -30,6 +31,7 @@ rule preprocessing_cladefinder_ancestral:
 	    (bcftools query -f '%ID,' {input.ANCESTRAL_VCF} | sed ':a;N;$!ba;s/\\n//g' | tee {output.NEGATIVE_TXT}) >> {log} 2>&1
         """
 
+
 rule check_HG:
     input:
         POSITIVE_TXT =  results_prefix / "cladefinder" / "{YSEQID}_{REF}_positives.txt",
@@ -43,11 +45,11 @@ rule check_HG:
         results_prefix / "cladefinder" / "cladefinder.txt.log"
     benchmark:
         results_prefix / "cladefinder" / "benchmark" / "{YSEQID}_{REF}_check_HG.benchmark"
-        
     shell:
         """
         (python workflow/scripts/cladeFinder.py {input.YFULLTREE} {input.POSITIVE_TXT} {input.NEGATIVE_TXT} {output[0]}) >> {log} 2>&1
         """
+
 
 rule save_HG:
     input:
@@ -60,11 +62,9 @@ rule save_HG:
         YFULLHG = "unknown"
         YFULLPATH = "unknown"
         line_counter = 0
-
         # Input and output file paths
         input_csv = input.CF_CSV
         output_file = output.HAPLO_DATA
-
         # Read the second line of the input CSV file
         with open(input_csv, 'r') as file:
             lines = file.readlines()
@@ -81,6 +81,7 @@ rule save_HG:
         with open(output.HAPLO_GROUP, 'w') as file:
             file.write(f"{YFULLHG}\n")  
 
+
 rule get_equivalent_and_downstream_SNPS:
     input:
         YFULLTREE =     "resources/tree/latest_YFull_YTree.json",
@@ -90,8 +91,6 @@ rule get_equivalent_and_downstream_SNPS:
         CLEANED_VCF_TBI =   results_prefix / "snp_calling" / "chrY_cleaned_{YSEQID}_{REF}.vcf.gz.tbi",
         IDXSTATS =      results_prefix / "mapping" / "{YSEQID}_bwa-mem_{REF}_sorted.bam.idxstats.tsv",
         HAPLO_GROUP =   results_prefix / "cladefinder" / "{YSEQID}_{REF}haploGroup"  
-
-
     output:
         PHYLOEQ_SNPS = results_prefix / "cladefinder" / "{YSEQID}_{REF}_PHYLOEQ_SNPS.tsv",
         DOWNSTR_SNPS = results_prefix / "cladefinder" / "{YSEQID}_{REF}_DOWNSTR_SNPS.tsv"

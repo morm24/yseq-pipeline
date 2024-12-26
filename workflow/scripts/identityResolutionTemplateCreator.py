@@ -62,7 +62,6 @@ def parsePAF(pos, pafOutputFile):
                     percent = float(residueMatches) / float(minDenom)
                     if querySeqLength > 500 and alignmentBlockLength > 500 and percent > 0.95:
                         fails[percent] = str(round(percent * 100,1)) + "% " + targSeqName + ":" + str(targStart) + ".." + str(targEnd) + " " + str(minDenom)
-
     if len(fails) > 0:
         maxPercent = max(fails.keys())
         return fails[maxPercent]
@@ -109,22 +108,23 @@ def createFastQ(seq, fastQFilename):
     w.close()
     
 def oneOff(referenceFile, refIndexFile, position, refseq):
-    bedFile = str(bedPath) + "bed.bed"+str(position)
-    fastQFile = "fastq.fastq"+str(position)
-    
+
+
+    bedFile = str(temppath) + "bed.bed"+str(position)
+    fastQFile = str(temppath) + "fastq.fastq"+str(position)
     createBED(position, bedFile,refseq)
     seq = getSequenceFromFasta(bedFile, referenceFile)
     createFastQ(seq, fastQFile)
-    pafOutputFile = "alignment.paf"+str(position)
+    pafOutputFile = str(temppath) + "alignment.paf"+str(position)
     executeMinimap2(refIndexFile, fastQFile, pafOutputFile)
     return parsePAF(position, pafOutputFile)
 
 def testPAF(refIndexFile, position):
-    pafOutputFile = "alignment.paf"+str(position)
+    pafOutputFile = str(temppath) +"alignment.paf"+str(position)
     return parsePAF(position, pafOutputFile)
 
 def blatOneOff(referenceFile, position, refseq):
-    bedFile = str(bedPath) + "bed.bed"
+    bedFile = str(temppath) + "bed.bed"
     
     createBED(position, bedFile, refseq)
     blatFile = str(position) + "_BLAT"
@@ -169,7 +169,6 @@ def lineProcessing(line, w, referenceFile, refIndexFile, refseq, output, passing
             dp4 = dp4.replace("DP4=","")
             dp4Split = dp4.split(",")
             cov = int(dp4Split[0]) + int(dp4Split[1]) + int(dp4Split[2]) + int(dp4Split[3])
-    #print("coverage\n" + str(cov))
     idVal = "chrY:" + pos
     intpos = int(pos)
     rowSplit[2] = idVal
@@ -179,17 +178,14 @@ def lineProcessing(line, w, referenceFile, refIndexFile, refseq, output, passing
         if int(cov) == 2:
             checkedRange = "2x"
             passing.append(pos)
-    #print(cov)
+        
     if checkedRange == "ok":
         checkedRange = oneOff(referenceFile, refIndexFile, intpos, refseq)
-
-        os.remove("fastq.fastq"+str(pos))
-        os.remove(str(bedPath) + "bed.bed"+str(pos))
-        os.remove("alignment.paf"+str(pos))
-
+        os.remove(str(temppath) + "fastq.fastq"+str(pos))
+        os.remove(str(temppath) + "bed.bed"+str(pos))
+        os.remove(str(temppath) + "alignment.paf"+str(pos))
     if checkedRange == "ok":
         passing.append(pos)
-        
     if referenceFile == "hs1.fa":
         blatLink = "https://ket.yseq.de:8443/Finch/FTDNA_EDI/Primer3/input?seq=CP086569.2:" + str(intpos - 500) + ".." + str(intpos+500) + "&name=" + idVal
         uscsGenomeBrowser = "http://genome.ucsc.edu/cgi-bin/hgTracks?db=" + refseq + "&lastVirtModeType=default&lastVirtModeExtraState=&virtModeType=default&virtMode=0&nonVirtPosition=&position=CP086569.2%3A" + str(intpos - 5) + "%2D" + str(intpos + 5) + "&hgsid=661900165_RCnZU2Sd4dWMqySzhwCkmOqVSxQI"
@@ -197,7 +193,6 @@ def lineProcessing(line, w, referenceFile, refIndexFile, refseq, output, passing
         blatLink = "https://ket.yseq.de:8443/Finch/FTDNA_EDI/Primer3/input?seq=ChrY:" + str(intpos - 500) + ".." + str(intpos+500) + "&name=" + idVal
         uscsGenomeBrowser = "http://genome.ucsc.edu/cgi-bin/hgTracks?db=" + refseq + "&lastVirtModeType=default&lastVirtModeExtraState=&virtModeType=default&virtMode=0&nonVirtPosition=&position=chrY%3A" + str(intpos - 5) + "%2D" + str(intpos + 5) + "&hgsid=661900165_RCnZU2Sd4dWMqySzhwCkmOqVSxQI"
     rowSplit = rowSplit + [checkedRange, blatLink, uscsGenomeBrowser]
-
     
     output.append("\t".join(rowSplit) + "\n")
 
@@ -207,7 +202,7 @@ def analyzeNovelSNPs(vcfFile, outputFile, referenceFile):
     
     #calculate num_threads by max possible memory usage (8Gb usage per thread)
     maxCores = max(1 , psutil.virtual_memory().total // (1024 ** 3) // 8 )
-    num_threads = os.cpu_count() if maxCores > os.cpu_count() else maxCores
+    num_threads = cores if maxCores > cores else maxCores 
 
     print("we are using " + str(num_threads) + " threads")
 
@@ -228,27 +223,19 @@ def analyzeNovelSNPs(vcfFile, outputFile, referenceFile):
             headers = headers + ["Exclusions","BLAT link","UCSC Genome Browser"]
             w.write("\t".join(headers) + "\n")
 
-
-
             #create multi threading pool
             pool = Pool(num_threads)
 
             for line in lines[1:]:
+                #print(line)
                 #start subfunction multi threaded: #lineProcessing(line,w,referenceFile, refIndexFile, refseq, output, passing)
                 pool.apply_async(lineProcessing,(line,w,referenceFile, refIndexFile, refseq, output, passing,))
             pool.close()
-            pool.join()   
+            pool.join()  
 
             #sort unsorted output array by collumn 2 (start pos)
             output = sorted(output, key=lambda x: int(x.split('\t')[1]))
-            print("\n\n\n\n\nfirst line of array \n\n\n\n")
-            if output: 
-                print(output[0])
-            else:
-                print("empty list")
-            print("\n\n\n\n\n")
             for text in output:
-                #print(text)
                 w.write(text)
         w.close()
     f.close()
@@ -260,17 +247,21 @@ def analyzeNovelSNPs(vcfFile, outputFile, referenceFile):
     print("elapsed time: " + str(end_time - start_time) + "s")
           
 from time import sleep
-
+cores=1
 if len(sys.argv) > 3:
     mode = sys.argv[1]
     if mode == "-batch":
         vcfFile = sys.argv[2]
         outputFile = sys.argv[3]
         referenceFile = sys.argv[4]
+        temppath = "resources/tmp/"
         if len(sys.argv) > 5:
             novelPassingOut = sys.argv[5] 
-        analyzeNovelSNPs(vcfFile, outputFile, referenceFile)  
-        bedPath = "temp/"
+            if len(sys.argv) > 6:
+                cores = int(sys.argv[6])
+                if len(sys.argv) > 7:
+                    temppath = sys.argv[7] + "/"
+        analyzeNovelSNPs(vcfFile, outputFile, referenceFile) 
    
     else:
         if mode == "-blat":

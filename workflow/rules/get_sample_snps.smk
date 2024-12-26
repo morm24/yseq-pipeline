@@ -15,7 +15,7 @@ rule download_snps:
         if [ "{wildcards.REF}" == "hg38" ]; then
             wget -O {output[0]} http://ybrowse.org/gbrowse2/gff/snps_hg38.vcf.gz
             wget -O {output[1]} http://ybrowse.org/gbrowse2/gff/snps_hg38.vcf.gz.tbi
-        elif [ "{wildcards.REF}" == "hs1" ]; then
+        elif [ "{wildcards.REF}" == "hs1" ]; then 
             wget -O {output.SNPS} http://hs1.ybrowse.org/gbrowse2/gff/snps_hs1.vcf.gz         
             wget -O {output.SNPS_TBI} http://hs1.ybrowse.org/gbrowse2/gff/snps_hs1.vcf.gz.tbi 
         else
@@ -76,7 +76,7 @@ rule get_differences_HARRY_ALIEN_SAMPLE:
         MERGED_VCF =    results_prefix  / "snp_calling" / "chrY_merged_{YSEQID}_{REF}.vcf.gz",
         VCF_TBI =       results_prefix  / "snp_calling" / "chrY_merged_{YSEQID}_{REF}.vcf.gz.tbi"
     output:
-        CALLED_VCF =    results_prefix  / "snp_calling" / "chrY_called_{YSEQID}_{REF}.vcf.gz",
+        CALLED_VCF =    temp(results_prefix  / "snp_calling" / "chrY_called_{YSEQID}_{REF}.vcf.gz"),
         VCF_TBI =       temp(results_prefix  / "snp_calling" / "chrY_called_{YSEQID}_{REF}.vcf.gz.tbi")
     conda:
         "../envs/get_sample_snps.yaml"
@@ -97,7 +97,7 @@ rule rm_HARRY_ALIEN_from_VCF:
         VCF_TBI =       results_prefix  / "snp_calling" / "chrY_called_{YSEQID}_{REF}.vcf.gz.tbi"
     output:
         #CLEANED_VCF =   temp(results_prefix  / "snp_calling" / "chrY_cleaned_{YSEQID}_{REF}.vcf.gz"),
-        CLEANED_VCF =   results_prefix  / "snp_calling" / "chrY_cleaned_{YSEQID}_{REF}.vcf.gz",
+        CLEANED_VCF =   temp(results_prefix  / "snp_calling" / "chrY_cleaned_{YSEQID}_{REF}.vcf.gz"),
         VCF_TBI =       temp(results_prefix  / "snp_calling" / "chrY_cleaned_{YSEQID}_{REF}.vcf.gz.tbi")
     conda:
         "../envs/get_sample_snps.yaml"
@@ -193,11 +193,14 @@ rule confirm_novel_SNPS:
         results_prefix / "snp_calling" / "logs" / "{YSEQID}_{REF}_confirm_novel_snps.log"
     benchmark:
         results_prefix / "snp_calling" / "benchmark" / "{YSEQID}_{REF}_confirm_novel_snps.benchmark"
+    params:
+        TEMP = tmp_prefix
     threads:
         workflow.cores  
     shell:
         """
-        (python3 workflow/scripts/identityResolutionTemplateCreator.py -batch {input.NOVEL_VCF_TSV} {output.NOVEL_TSV} {input.REFSEQ} {output.NOVEL_PASSING_OUT}) > {log} 2>&1
+        mkdir -p {params}
+        (python3 workflow/scripts/identityResolutionTemplateCreator.py -batch {input.NOVEL_VCF_TSV} {output.NOVEL_TSV} {input.REFSEQ} {output.NOVEL_PASSING_OUT} {threads} {params}) > {log} 2>&1
         """
 rule indel_calling:
     input:

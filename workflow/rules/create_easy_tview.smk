@@ -6,7 +6,6 @@ rule create_easy_tview:
         results_prefix / "mapping" / "tview_{YSEQID}_{REF}.sh"
     conda:
         "../envs/bam_process.yaml"
-
     benchmark:
         results_prefix / "mapping" / "benchmark" / "{YSEQID}_{REF}_create_tview.benchmark"
     shell:

@@ -15,13 +15,12 @@ rule index_refseq_minimap2:
         minimap2 {input.REFSEQ} -d {output.INDEX} > {log} 2>&1
         """
 
+
 #map the Sample reads to the reference fasta file with minimap2
 rule map_minimap2:
     input:
-        READS_1 = sample_prefix / "{YSEQID}_R1.fastq.gz",
-        READS_2 = sample_prefix / "{YSEQID}_R2.fastq.gz",
-        INDEX  = ref_prefix / "{REF}/{REF}.fa.mmi",
-        REFSEQ = ref_prefix / "{REF}/{REF}.fa"
+        READS = multiext(str(sample_prefix / "{YSEQID}_"), "R2.fastq.gz", "R1.fastq.gz"),
+        REFSEQ = multiext(str(ref_prefix / "{REF}/{REF}"),".fa", ".mmi")
     output: 
         BAM = temp(results_prefix / "mapping" / "{YSEQID}_minimap2_{REF}.bam")
     conda:
@@ -31,24 +30,21 @@ rule map_minimap2:
     benchmark:
         results_prefix / "mapping" / "benchmark" / "{YSEQID}_minimap2_{REF}.benchmark"
     params:
-        "-a -x sr -t " if (config["READS"] == "short") else "-ax map-ont -t" 
+        "-a -x sr" if (config["READS"] == "short") else "-ax map-ont" 
     threads: workflow.cores
     shell:
         """
-        (minimap2 {params} {threads} {input.INDEX} {input.READS_1} {input.READS_2} | 
-        samtools view -@ {threads} -b -t {input.REFSEQ} -o {output.BAM} - ) > {log} 2>&1
+        (minimap2 {params} -t {threads} {input.REFSEQ[1]} {input.READS[0]} {input.READS[1]} | 
+        samtools view -@ {threads} -b -t {input.REFSEQ[0]} -o {output.BAM} - ) > {log} 2>&1
         """
+
 
 #index the reference fasta file with bwa
 rule index_refseq_bwa:
     input:
         REFSEQ = ref_prefix / "{REF}/{REF}.fa"
     output:
-        BWT = protected(ref_prefix / "{REF}/{REF}.fa.bwt"),
-        AMB = protected(ref_prefix / "{REF}/{REF}.fa.amb"),
-        ANN = protected(ref_prefix / "{REF}/{REF}.fa.ann"),
-        PAC = protected(ref_prefix / "{REF}/{REF}.fa.pac"),
-        SA  = protected(ref_prefix / "{REF}/{REF}.fa.sa")
+        protected( multiext(str(ref_prefix / "{REF}/{REF}") ,".fa.bwt", ".fa.amb", ".fa.ann", ".fa.pac", ".fa.sa"))
     log:
         ref_prefix / "{REF}/{REF}_bwa_index.log"
     benchmark:
@@ -60,17 +56,11 @@ rule index_refseq_bwa:
         bwa index {input.REFSEQ} > {log} 2>&1
         """
 
+
 rule map_bwa:
     input:
-        READS_1 = sample_prefix / "{YSEQID}_R1.fastq.gz",
-        READS_2 = sample_prefix / "{YSEQID}_R2.fastq.gz",
-        #
-        REFSEQ  = ref_prefix / "{REF}/{REF}.fa",
-        BWT = ref_prefix / "{REF}/{REF}.fa.bwt",
-        AMB = ref_prefix / "{REF}/{REF}.fa.amb",
-        ANN = ref_prefix / "{REF}/{REF}.fa.ann",
-        PAC = ref_prefix / "{REF}/{REF}.fa.pac",
-        SA  = ref_prefix / "{REF}/{REF}.fa.sa"
+        READS = multiext(str(sample_prefix / "{YSEQID}_"), "R2.fastq.gz", "R1.fastq.gz"),
+        REFSEQ= multiext(str(ref_prefix / "{REF}/{REF}"),".fa", ".fa.bwt", ".fa.amb", ".fa.ann", ".fa.pac", ".fa.sa")
     output: 
         BAM = temp(results_prefix / "mapping" / "{YSEQID}_bwa-mem_{REF}.bam")
     conda:
@@ -79,14 +69,14 @@ rule map_bwa:
         results_prefix / "mapping" / "logs" / "{YSEQID}_bwa-mem_{REF}.log"
     benchmark:
         results_prefix / "mapping" / "benchmark" / "{YSEQID}_bwa-mem_{REF}.benchmark"
-    params:
-        BWA = "-M -t " #-t has to be last!
     threads: workflow.cores
     shell:
         """
-        (bwa mem {params.BWA} {threads} {input.REFSEQ} {input.READS_1} {input.READS_2} | 
-        samtools view -@ {threads} -b -t {input.REFSEQ} -o {output.BAM} - ) > {log} 2>&1
+        (bwa mem -M -t {threads} {input.REFSEQ[0]} {input.READS[0]} {input.READS[1]} | 
+        samtools view -@ {threads} -b -t {input.REFSEQ[0]} -o {output.BAM} - ) > {log} 2>&1
         """
+
+
 #sort and index the BAM file (mapped reads) for faster processing in future steps
 rule sort_and_index:
     input:
@@ -102,14 +92,16 @@ rule sort_and_index:
     benchmark:
         results_prefix / "mapping" / "benchmark" / "{YSEQID}_{REF}_samtools_sort.benchmark"
     params:
-        SORTDIR = "-T resources/tmp/sorted"
-    threads: workflow.cores * 1
+        SORTDIR = tmp_prefix
+    threads: workflow.cores 
     shell:
         """
-        samtools sort -@ {threads} {params.SORTDIR} -o {output.SORTED_BAM} {input.BAM}    > {log} 2>&1
+        mkdir -p {params.SORTDIR}
+        samtools sort -@ {threads} -T {params.SORTDIR} -o {output.SORTED_BAM} {input.BAM}    > {log} 2>&1
 	    samtools index -@ {threads} {output.SORTED_BAM}                                   >> {log} 2>&1
 	    samtools idxstats {output.SORTED_BAM} | tee {output.IDXSTATS}                     >> {log} 2>&1
         """
+
 
 #Get Mapping statistics of the bam file for quality control
 #swap the code with bamstaistics or sth. like that
@@ -127,11 +119,12 @@ rule get_mapping_statistics:
     benchmark:
         results_prefix / "mapping" / "benchmark" / "{YSEQID}_{REF}_bamstats.benchmark"
     threads: 
-        workflow.cores * 1
+        1
     shell:
         """
         bamstats -u -i {input.BAM} -o {output.STATS} > {log} 2>&1
         """
+
 
 #extract the mtDNA and Y chromosome reads from the BAM file for valifating the results outside the pipeline   
 rule seperate_BAM:

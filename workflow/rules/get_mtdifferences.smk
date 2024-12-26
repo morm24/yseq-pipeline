@@ -2,11 +2,9 @@ rule mt_consensus:
     input:
         BAM_SORTED = results_prefix / "mapping" / "{YSEQID}_bwa-mem_{REF}_sorted.bam",
         REFSEQ = ref_prefix / "{REF}/{REF}.fa"
-
     output:
         VCF = results_prefix / "mtdna" / "chrM_{YSEQID}_{REF}.vcf.gz",
         CONSENSUS = results_prefix / "mtdna" / "{YSEQID}_{REF}_mtDNA.fasta"
-
     conda:
         "../envs/bam_process.yaml"
     log:
@@ -15,13 +13,13 @@ rule mt_consensus:
         results_prefix / "mtdna" / "benchmark" / "{YSEQID}_{REF}_mt_consensus.benchmark"
     threads:
         workflow.cores * 1
-
     shell: 
         """
         (bcftools mpileup -r chrM -Ou -C 50 -f {input.REFSEQ} {input.BAM_SORTED} | bcftools call --threads {threads} -O z -v -m -P 0  > {output.VCF}) > {log} 2>&1
         tabix {output.VCF} >> {log} 2>&1
         (samtools faidx {input.REFSEQ} chrM | bcftools consensus {output.VCF} -o {output.CONSENSUS}) >> {log} 2>&1
         """
+
 
 rule get_mtdna_differences_process:
     input:
@@ -41,6 +39,8 @@ rule get_mtdna_differences_process:
         python workflow/scripts/getMTDNADifferences.py -process {input.VCF} resources/haplogrep/haplogrep-2.1.25.jar {output.MTDNA_SNPS} {output.HAPLO_TSV} > {log} 2>&1
         
         """ 
+
+
 rule get_mtdna_differences_update: 
     input:
         MT_VCF =           results_prefix / "mtdna" / "chrM_{YSEQID}_{REF}.vcf.gz",
@@ -59,6 +59,8 @@ rule get_mtdna_differences_update:
         mkdir -p {output.TEST_OUTPUT} > {log} 2>&1
         (python workflow/scripts/getMTDNADifferences.py -update {output.TEST_OUTPUT}  {output.TEST_OUTPUT}.out {input.MT_VCF} {input.PHYLOEQ_SNPS} {input.DOWNSTR_SNPS} "The differences to the rCRS are" "phylo-equivalent SNPs to" "known downstream SNPs to" "novel SNPs found in sample"  ) >> {log} 2>&1
         """
+
+
 rule get_mtDifferences_addAlleles:
     input:
         MTDNA_SNPS =    results_prefix / "mtdna" / "{YSEQID}_{REF}_MTDNA_SNPS.tsv",
@@ -78,6 +80,7 @@ rule get_mtDifferences_addAlleles:
         """
         (python workflow/scripts/getMTDNADifferences.py -addAlleles {output.ALLELES_TSV} {input.MTDNA_SNPS} {wildcards.YSEQID} {input.MT_VCF} {input.PHYLOEQ_SNPS} {input.DOWNSTR_SNPS} chrY_{wildcards.YSEQID}_{wildcards.REF}.vcf.gz) > {log} 2>&1
         """
+
 
 rule get_mtDifferences_create_update_script:
     input:

@@ -9,10 +9,6 @@ samples_df = pd.DataFrame(pd.read_csv("./config/samples.csv"))
 yseqids = samples_df["YSEQID"].to_list()
 refs = samples_df["REF"].to_list()  
 
-
-#default_threads = config["THREADS"]
-
-
 wildcard_constraints:
     YSEQID = r"\d{1,6}"
 
@@ -47,39 +43,22 @@ if missing_bool:
     print("Can't locate:")
     for x in missing:
         print(x) 
-    print("Did you copied the right files / filenames? \nAre symlinks broken?")
+    print("Did you copy the right files / filenames?\nAre symlinks broken?")
     exit()
 
 rule all:
     input:
-        expand(results_prefix / "mapping" / "tview_{YSEQID}_{REF}.sh",               zip, YSEQID=yseqids, REF=refs), # pick row-wise 
-        expand(results_prefix / "mapping" / "{YSEQID}_bwa-mem_{REF}_chrY.bam",       zip, YSEQID=yseqids, REF=refs),
-        expand(results_prefix / "mapping" / "{YSEQID}_bwa-mem_{REF}_chrM.bam",  zip, YSEQID=yseqids, REF=refs),
-        expand(results_prefix / "mapping" / "{YSEQID}_{REF}_mapping_stats.txt",      zip, YSEQID=yseqids, REF=refs),
-        expand(results_prefix / "snp_calling" / "chrY_INDELs_{YSEQID}_{REF}.gz",         zip, YSEQID=yseqids, REF=refs),
-        expand(results_prefix / "cladefinder" / "{YSEQID}_{REF}_PHYLOEQ_SNPS.tsv",       zip, YSEQID=yseqids, REF=refs),
-        expand(results_prefix / "cladefinder" / "{YSEQID}_{REF}_DOWNSTR_SNPS.tsv",       zip, YSEQID=yseqids, REF=refs),
-        expand(results_prefix / "call_chr_snps" / "all_chr_snps_{YSEQID}_{REF}.vcf.gz",    zip, YSEQID=yseqids, REF=refs),
-        expand(results_prefix  / "snp_calling" /  "chrY_novel_SNPs_{YSEQID}_{REF}.tsv",    zip, YSEQID=yseqids, REF=refs),
-        expand(results_prefix / "cladefinder" / "{YSEQID}_{REF}_addAlleles.tsv",         zip, YSEQID=yseqids, REF=refs)
-        
-        #unused code comments will be removed in final version
-        #expand(results_prefix  / "phenotyping" / "{YSEQID}_{REF}_phenotyping.alx",       zip, YSEQID=yseqids, REF=refs)
-        #expand(results_prefix / "{YSEQID}_{REF}_positives.txt",         zip, YSEQID=yseqids, REF=refs),
-        #expand(results_prefix / "{YSEQID}_{REF}_result_summary.txt",     zip, YSEQID=yseqids, REF=refs),
-        #expand(results_prefix / "{YSEQID}_{REF}_update.sh",              zip, YSEQID=yseqids, REF=refs),
-        #expand(results_prefix / "{YSEQID}_{REF}_negatives.txt",         zip, YSEQID=yseqids, REF=refs),
-        #expand(results_prefix / "{YSEQID}_{REF}haploData.txt",           zip, YSEQID=yseqids, REF=refs),
-        #expand(results_prefix / "{YSEQID}_{REF}_MTDNA_SNPS.tsv",         zip, YSEQID=yseqids, REF=refs),
-        #expand(results_prefix / "{YSEQID}_bwa_mem_{REF}_sorted.bam",     zip, YSEQID=yseqids, REF=refs),
-        #expand(results_prefix / "{YSEQID}_{REF}_mtDNA.fasta",            zip, YSEQID=yseqids, REF=refs),
-        #expand("addAlleles.tsv",         zip, YSEQID=yseqids, REF=refs)
+        expand(results_prefix / "mapping" / "tview_{YSEQID}_{REF}.sh",                  zip, YSEQID=yseqids, REF=refs), # pick row-wise 
+        expand(results_prefix / "mapping" / "{YSEQID}_bwa-mem_{REF}_chrY.bam",          zip, YSEQID=yseqids, REF=refs),
+        expand(results_prefix / "mapping" / "{YSEQID}_bwa-mem_{REF}_chrM.bam",          zip, YSEQID=yseqids, REF=refs),
+        expand(results_prefix / "mapping" / "{YSEQID}_{REF}_mapping_stats.txt",         zip, YSEQID=yseqids, REF=refs),
+        expand(results_prefix / "snp_calling" / "chrY_INDELs_{YSEQID}_{REF}.gz",        zip, YSEQID=yseqids, REF=refs),
+        expand(results_prefix / "cladefinder" / "{YSEQID}_{REF}_PHYLOEQ_SNPS.tsv",      zip, YSEQID=yseqids, REF=refs),
+        expand(results_prefix / "cladefinder" / "{YSEQID}_{REF}_DOWNSTR_SNPS.tsv",      zip, YSEQID=yseqids, REF=refs),
+        expand(results_prefix / "call_chr_snps" / "all_chr_snps_{YSEQID}_{REF}.vcf.gz", zip, YSEQID=yseqids, REF=refs),
+        expand(results_prefix  / "snp_calling" /  "chrY_novel_SNPs_{YSEQID}_{REF}.tsv", zip, YSEQID=yseqids, REF=refs),
+        expand(results_prefix / "cladefinder" / "{YSEQID}_{REF}_addAlleles.tsv",        zip, YSEQID=yseqids, REF=refs)
 
-
-
-
-
-##### target rules #####
 
 include: "rules/map_fastq.smk"
 include: "rules/create_easy_tview.smk"
@@ -87,29 +66,3 @@ include: "rules/get_sample_snps.smk"
 include: "rules/get_mtdifferences.smk"
 include: "rules/cladefinder.smk"
 include: "rules/all_chr_snps.smk"
-#include: "rules/phenotyping.smk"
-#include: "rules/seperate_bam.smk"
-#include: "rules/all_chr_snps_onerule.smk"
-
-
-
-
-
-
-#current snakemake calls: 
-
-#snakemake -c 32
-#snakemake -npc 32
-#snakemake -npc 32 --dag
-#snakemake --forceall
-#snakemake -c32 > snakemake.log 2>&1
-#snakemake -p --use-conda -c 32
-
-
-#snakemake -c 32 -id 63819 -ref hg38
-
-
-#snakemake --touch
-
-
-#warning!  java needs to be installed  (apt install default-jre)

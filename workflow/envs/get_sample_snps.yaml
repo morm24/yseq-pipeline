@@ -10,3 +10,5 @@ dependencies:
   - wget=1.21.4
   - psutil=5.9.4
   - coreutils
+  - bedtools=2.31.1
+  - minimap2=2.28

@@ -11,4 +11,3 @@ TMP_PATH: "resources/tmp"        # Path for temporary files
 REF_PATH: "resources/refseq"     # Path for reference sequence
 RESULTS_PATH: "results"        # Path for reference sequence results
 LOG_PATH: "log"       # Path for log files
-
