@@ -207,7 +207,7 @@ rule indel_calling:
     input:
         CALLED_VCF =    results_prefix  / "snp_calling" / "chrY_called_{YSEQID}_{REF}.vcf.gz"
     output:
-        INDEL_VCF =     results_prefix  / "snp_calling" / "chrY_INDELs_{YSEQID}_{REF}.gz"
+        INDEL_VCF =     results_prefix  / "snp_calling" / "chrY_INDELs_{YSEQID}_{REF}.gz",
         INDEL_TBI =     results_prefix  / "snp_calling" / "chrY_INDELs_{YSEQID}_{REF}.gz.tbi"
     conda:
         "../envs/get_sample_snps.yaml"

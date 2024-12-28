@@ -17,7 +17,7 @@ rule combine_chr_snps:
     input:
         expand("resources/tmp/{chr}_{{YSEQID}}_{{REF}}.vcf.gz", chr=chromosomes)
     output:
-        ALL_CHR_SNPS = results_prefix / "call_chr_snps" / "all_chr_snps_{YSEQID}_{REF}.vcf.gz"
+        ALL_CHR_SNPS = results_prefix / "call_chr_snps" / "all_chr_snps_{YSEQID}_{REF}.vcf.gz",
         TBI = results_prefix / "call_chr_snps" / "all_chr_snps_{YSEQID}_{REF}.vcf.gz.tbi"
     conda:
         "../envs/bam_process.yaml" 
