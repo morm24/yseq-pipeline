@@ -133,6 +133,7 @@ rule seperate_BAM:
         
     output:
         CHR_BAM = results_prefix / "mapping" / "{YSEQID}_bwa-mem_{REF}_{chr}.bam"
+        CHR_BAI = results_prefix / "mapping" / "{YSEQID}_bwa-mem_{REF}_{chr}.bam.bai"
 
     conda:
         "../envs/mapping.yaml"

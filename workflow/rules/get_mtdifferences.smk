@@ -4,6 +4,7 @@ rule mt_consensus:
         REFSEQ = ref_prefix / "{REF}/{REF}.fa"
     output:
         VCF = results_prefix / "mtdna" / "chrM_{YSEQID}_{REF}.vcf.gz",
+        TBI = results_prefix / "mtdna" / "chrM_{YSEQID}_{REF}.vcf.gz.tbi",
         CONSENSUS = results_prefix / "mtdna" / "{YSEQID}_{REF}_mtDNA.fasta"
     conda:
         "../envs/bam_process.yaml"

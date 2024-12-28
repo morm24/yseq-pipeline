@@ -163,6 +163,7 @@ rule get_novel_SNPS:
         VCF_TBI =       results_prefix  / "snp_calling" / "chrY_called_{YSEQID}_{REF}.vcf.gz.tbi"
     output:
         NOVEL_VCF =     results_prefix  / "snp_calling" / "chrY_novel_SNPs_{YSEQID}_{REF}.vcf.gz",
+        NOVEL_TBI =     results_prefix  / "snp_calling" / "chrY_novel_SNPs_{YSEQID}_{REF}.vcf.gz.tbi",
         NOVEL_VCF_TSV =     results_prefix  / "snp_calling" / "chrY_novel_SNPs_{YSEQID}_{REF}.vcf.tsv"
     conda:
         "../envs/get_sample_snps.yaml"
@@ -207,6 +208,7 @@ rule indel_calling:
         CALLED_VCF =    results_prefix  / "snp_calling" / "chrY_called_{YSEQID}_{REF}.vcf.gz"
     output:
         INDEL_VCF =     results_prefix  / "snp_calling" / "chrY_INDELs_{YSEQID}_{REF}.gz"
+        INDEL_TBI =     results_prefix  / "snp_calling" / "chrY_INDELs_{YSEQID}_{REF}.gz.tbi"
     conda:
         "../envs/get_sample_snps.yaml"
     log:

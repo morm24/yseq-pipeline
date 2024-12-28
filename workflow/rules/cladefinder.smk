@@ -42,7 +42,7 @@ rule check_HG:
     conda:
         "../envs/bam_process.yaml"
     log: 
-        results_prefix / "cladefinder" / "cladefinder.txt.log"
+        results_prefix / "cladefinder" / "log" / "cladefinder.txt.log"
     benchmark:
         results_prefix / "cladefinder" / "benchmark" / "{YSEQID}_{REF}_check_HG.benchmark"
     shell:
@@ -97,7 +97,7 @@ rule get_equivalent_and_downstream_SNPS:
     conda:
         "../envs/bam_process.yaml" 
     log: 
-        results_prefix / "cladefinder" / "getEQAndDownSNPs.txt.log"
+        results_prefix / "cladefinder" / "log" / "getEQAndDownSNPs.txt.log"
     benchmark:
         results_prefix / "cladefinder" / "benchmark" / "{YSEQID}_{REF}_getEQAndDownSNPs.benchmark"
     shell:
