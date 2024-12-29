@@ -20,7 +20,7 @@ rule index_refseq_minimap2:
 rule map_minimap2:
     input:
         READS = multiext(str(sample_prefix / "{YSEQID}_"), "R2.fastq.gz", "R1.fastq.gz"),
-        REFSEQ = multiext(str(ref_prefix / "{REF}/{REF}"),".fa", ".mmi")
+        REFSEQ = multiext(str(ref_prefix / "{REF}/{REF}"),".fa", ".fa.mmi")
     output: 
         BAM = temp(results_prefix / "mapping" / "{YSEQID}_minimap2_{REF}.bam")
     conda:
@@ -80,11 +80,11 @@ rule map_bwa:
 #sort and index the BAM file (mapped reads) for faster processing in future steps
 rule sort_and_index:
     input:
-        BAM = results_prefix / "mapping" / "{YSEQID}_bwa-mem_{REF}.bam" if (config["MAPPER"] == "bwa") else results_prefix / "{YSEQID}_minimap2_{REF}.bam" #elif (config["MAPPER"] == "minimap2") results_prefix / "{YSEQID}_minimap2_{REF}.bam"
+        BAM = str(results_prefix / "mapping" / "{YSEQID}_bwa-mem_{REF}.bam") if (config["MAPPER"] == "bwa") else (results_prefix / "mapping" / "{YSEQID}_minimap2_{REF}.bam" )
     output:
-        SORTED_BAM = results_prefix / "mapping" / "{YSEQID}_bwa-mem_{REF}_sorted.bam",
-        BAI = results_prefix / "mapping" / "{YSEQID}_bwa-mem_{REF}_sorted.bam.bai",
-        IDXSTATS = results_prefix / "mapping" / "{YSEQID}_bwa-mem_{REF}_sorted.bam.idxstats.tsv"
+        SORTED_BAM = results_prefix / "mapping" / "{YSEQID}_{REF}_sorted.bam",
+        BAI = results_prefix / "mapping" / "{YSEQID}_{REF}_sorted.bam.bai",
+        IDXSTATS = results_prefix / "mapping" / "{YSEQID}_{REF}_sorted.bam.idxstats.tsv"
     conda:
         "../envs/mapping.yaml"
     log:
@@ -107,8 +107,8 @@ rule sort_and_index:
 #swap the code with bamstaistics or sth. like that
 rule get_mapping_statistics:
     input:
-        BAM = results_prefix / "mapping" / "{YSEQID}_bwa-mem_{REF}_sorted.bam",
-        IDXSTATS =  results_prefix / "mapping" / "{YSEQID}_bwa-mem_{REF}_sorted.bam.idxstats.tsv"
+        BAM = results_prefix / "mapping" / "{YSEQID}_{REF}_sorted.bam",
+        IDXSTATS =  results_prefix / "mapping" / "{YSEQID}_{REF}_sorted.bam.idxstats.tsv"
 
     output:
         STATS = results_prefix / "mapping" / "{YSEQID}_{REF}_mapping_stats.txt"
@@ -129,22 +129,22 @@ rule get_mapping_statistics:
 #extract the mtDNA and Y chromosome reads from the BAM file for valifating the results outside the pipeline   
 rule seperate_BAM:
     input:
-        BAM = results_prefix / "mapping" / "{YSEQID}_bwa-mem_{REF}_sorted.bam"
+        BAM = results_prefix / "mapping" / "{YSEQID}_{REF}_sorted.bam"
         
     output:
-        CHR_BAM = results_prefix / "mapping" / "{YSEQID}_bwa-mem_{REF}_{chr}.bam",
-        CHR_BAI = results_prefix / "mapping" / "{YSEQID}_bwa-mem_{REF}_{chr}.bam.bai"
+        CHR_BAM = results_prefix / "mapping" / "{YSEQID}_{REF}_{CHR}.bam",
+        CHR_BAI = results_prefix / "mapping" / "{YSEQID}_{REF}_{CHR}.bam.bai"
 
     conda:
         "../envs/mapping.yaml"
     log:
-        results_prefix / "mapping" / "logs" / "{YSEQID}_bwa-mem_{REF}_{chr}.log"
+        results_prefix / "mapping" / "logs" / "{YSEQID}_separate_{REF}_{CHR}.log"
     benchmark:
-        results_prefix / "mapping" / "benchmark" / "{YSEQID}_bwa-mem_{REF}_{chr}.benchmark"
+        results_prefix / "mapping" / "benchmark" / "{YSEQID}_separate_{REF}_{CHR}.benchmark"
     threads: 
         workflow.cores * 1
     shell:
         """
-        (samtools view -@ {threads} -b -o {output.CHR_BAM} {input.BAM} {wildcards.chr}) > {log} 2>&1
+        (samtools view -@ {threads} -b -o {output.CHR_BAM} {input.BAM} {wildcards.CHR}) > {log} 2>&1
         samtools index {output.CHR_BAM} >> {log} 2>&1
         """

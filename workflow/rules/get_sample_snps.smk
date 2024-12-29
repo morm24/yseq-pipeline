@@ -28,7 +28,7 @@ rule download_snps:
 #extract all SNPs from the sample
 rule get_all_SNPs_Sample:
     input:
-        SORTED_BAM =    results_prefix / "mapping" / "{YSEQID}_bwa-mem_{REF}_sorted.bam",
+        SORTED_BAM =    results_prefix / "mapping" / "{YSEQID}_{REF}_sorted.bam",
         REFSEQ =        ref_prefix / "{REF}/{REF}.fa"
     output:
         VCF_TBI =       temp(results_prefix  / "snp_calling" / "chrY_raw_{YSEQID}_{REF}.vcf.gz.tbi"),

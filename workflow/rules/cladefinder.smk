@@ -89,7 +89,7 @@ rule get_equivalent_and_downstream_SNPS:
         NEGATIVES_TXT = results_prefix / "cladefinder" / "{YSEQID}_{REF}_negatives.txt",
         CLEANED_VCF =   results_prefix / "snp_calling" / "chrY_cleaned_{YSEQID}_{REF}.vcf.gz",
         CLEANED_VCF_TBI =   results_prefix / "snp_calling" / "chrY_cleaned_{YSEQID}_{REF}.vcf.gz.tbi",
-        IDXSTATS =      results_prefix / "mapping" / "{YSEQID}_bwa-mem_{REF}_sorted.bam.idxstats.tsv",
+        IDXSTATS =      results_prefix / "mapping" / "{YSEQID}_{REF}_sorted.bam.idxstats.tsv",
         HAPLO_GROUP =   results_prefix / "cladefinder" / "{YSEQID}_{REF}haploGroup"  
     output:
         PHYLOEQ_SNPS = results_prefix / "cladefinder" / "{YSEQID}_{REF}_PHYLOEQ_SNPS.tsv",

@@ -1,6 +1,6 @@
 rule mt_consensus:
     input:
-        BAM_SORTED = results_prefix / "mapping" / "{YSEQID}_bwa-mem_{REF}_sorted.bam",
+        BAM_SORTED = results_prefix / "mapping" / "{YSEQID}_{REF}_sorted.bam",
         REFSEQ = ref_prefix / "{REF}/{REF}.fa"
     output:
         VCF = results_prefix / "mtdna" / "chrM_{YSEQID}_{REF}.vcf.gz",

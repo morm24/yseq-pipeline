@@ -1,6 +1,6 @@
 rule call_chr_snp:
     input: 
-        SORTED_BAM =    results_prefix / "mapping" / "{YSEQID}_bwa-mem_{REF}_sorted.bam",
+        SORTED_BAM =    results_prefix / "mapping" / "{YSEQID}_{REF}_sorted.bam",
         REFSEQ =        ref_prefix / "{REF}/{REF}.fa"
     output: 
         VCF =           temp("resources/tmp/{chr}_{YSEQID}_{REF}.vcf.gz")

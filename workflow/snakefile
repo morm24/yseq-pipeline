@@ -10,8 +10,8 @@ yseqids = samples_df["YSEQID"].to_list()
 refs = samples_df["REF"].to_list()  
 
 wildcard_constraints:
-    YSEQID = r"\d{1,6}"
-
+    YSEQID = r"\d{1,6}",
+    CHR = "chrM|chrY"
     #REF = "hg38|hs1",
 
 # Create a list of tuples for wildcards
@@ -49,8 +49,8 @@ if missing_bool:
 rule all:
     input:
         expand(results_prefix / "mapping" / "tview_{YSEQID}_{REF}.sh",                  zip, YSEQID=yseqids, REF=refs), # pick row-wise 
-        expand(results_prefix / "mapping" / "{YSEQID}_bwa-mem_{REF}_chrY.bam",          zip, YSEQID=yseqids, REF=refs),
-        expand(results_prefix / "mapping" / "{YSEQID}_bwa-mem_{REF}_chrM.bam",          zip, YSEQID=yseqids, REF=refs),
+        expand(results_prefix / "mapping" / "{YSEQID}_{REF}_chrY.bam",          zip, YSEQID=yseqids, REF=refs),
+        expand(results_prefix / "mapping" / "{YSEQID}_{REF}_chrM.bam",          zip, YSEQID=yseqids, REF=refs),
         expand(results_prefix / "mapping" / "{YSEQID}_{REF}_mapping_stats.txt",         zip, YSEQID=yseqids, REF=refs),
         expand(results_prefix / "snp_calling" / "chrY_INDELs_{YSEQID}_{REF}.gz",        zip, YSEQID=yseqids, REF=refs),
         expand(results_prefix / "cladefinder" / "{YSEQID}_{REF}_PHYLOEQ_SNPS.tsv",      zip, YSEQID=yseqids, REF=refs),
